@@ -26,13 +26,20 @@ export async function POST(request:Request){
         const isCodeNotExpired = new Date(user.verifyCodeExpires) > new Date()
 
         if(isCodeValid && isCodeNotExpired){
-            user.isVerified = true;
-            await user.save();
+            await UserModel.updateOne(
+                { _id: user._id },
+                { 
+                    $set: { isVerified: true },
+                    $unset: { 
+                        verifyCode: "",
+                        verifyCodeExpires: "" 
+                    }
+                }
+            ); 
             return Response.json({
-                success:true,
+                success: true,
                 message: "User verified successfully"
-            },
-            {status: 200})
+            }, { status: 200 });
         } else if(!isCodeNotExpired){
                 return Response.json({
                     success: false,

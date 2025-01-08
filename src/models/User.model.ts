@@ -40,11 +40,11 @@ const UserSchema: Schema<User> = new Schema({
     messages: [MessageSchema],
     verifyCode: {
         type: String, 
-        required: true
+        required: false
     },
     verifyCodeExpires: {
         type: Date, 
-        required: true
+        required: false
     },
     isVerified: {
         type: Boolean,
