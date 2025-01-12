@@ -40,16 +40,16 @@ export async function GET(request: Request){
         }
 
         const {username} = result.data;
-        const existingVerifiedUser= await UserModel.findOne({
-            username,
+        const existingVerifiedUser = await UserModel.findOne({
+            username: { $regex: new RegExp(`^${username}$`, 'i') },
             isVerified: true
-        })
+        });
 
         if(existingVerifiedUser){
            return Response.json(
             {
                 success: false,
-                message: "Username already taken"
+                message: `Username already taken (${existingVerifiedUser.username})`
             },
             {
                 status: 400
