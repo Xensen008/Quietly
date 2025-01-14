@@ -11,10 +11,13 @@ export const  authOptions:NextAuthOptions = {
             id:"credentials",
             name:"Credentials",
             credentials: {
-                username: { label: "Email", type: "text" },
+                identifier: { label: "Email or Username", type: "text" },
                 password: { label: "Password", type: "password" }
               },
               async authorize(credentials:any): Promise<any> {
+                if (!credentials?.identifier || !credentials?.password) {
+                    throw new Error("Missing credentials");
+                }
                 await dbConnect();
                 try {
                     const user = await UserModel.findOne({
@@ -24,7 +27,7 @@ export const  authOptions:NextAuthOptions = {
                         ]
                     })
                     if(!user){
-                        throw new Error("No user found")
+                        throw new Error("Invalid Credentials or no user found")
                     }
 
                     if(!user.isVerified){
@@ -45,6 +48,9 @@ export const  authOptions:NextAuthOptions = {
         })
     ],
     callbacks: {
+        async redirect({ url, baseUrl }) {
+            return url.startsWith(baseUrl) ? url : baseUrl + '/dashboard'
+        },
         async jwt(token: JWT, user?: User): Promise<JWT> {
             if (user) {
                 token._id = user._id?.toString()
