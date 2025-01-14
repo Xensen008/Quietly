@@ -30,7 +30,7 @@ const page = () => {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const toast = useToast()
+  const { toast } = useToast()
   const [debouncedUsername] =  useDebounceValue(username,600)
   //const debounced = useDebounceCallback(setUsername, 300)
   const router = useRouter()
@@ -73,7 +73,7 @@ const page = () => {
     setIsSubmitting(true)
     try {
       const response = await axios.post<ApiResponse>('/api/sign-up', data)
-      toast.toast({
+      toast({
         title: 'Success',
         description: response?.data?.message
       })
@@ -83,7 +83,7 @@ const page = () => {
       console.error("Error in Signup page" , error)
       const axiosError = error as AxiosError<ApiResponse>;
       if (axiosError.response?.status === 400){
-        toast.toast({
+        toast({
           title: 'Error in Signup',
           description: axiosError?.response?.data.message,
           variant: 'destructive'
