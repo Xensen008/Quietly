@@ -5,7 +5,7 @@ import { JWT } from 'next-auth/jwt'
 import bcrypt from 'bcryptjs'
 import UserModel from '@/models/User.model'
 
-export const  authOptions:NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             id:"credentials",
@@ -36,7 +36,13 @@ export const  authOptions:NextAuthOptions = {
 
                     const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password) 
                     if (isPasswordCorrect) {
-                        return user
+                        return {
+                            _id: user?._id?.toString(),
+                            email: user?.email,
+                            username: user.username,
+                            isVerified: user.isVerified,
+                            isAcceptingMessages: user.isAcceptingMessages
+                        }
                     } else {
                         throw new Error('Password is incorrect')
                     }
@@ -49,32 +55,44 @@ export const  authOptions:NextAuthOptions = {
     ],
     callbacks: {
         async redirect({ url, baseUrl }) {
-            return url.startsWith(baseUrl) ? url : baseUrl + '/dashboard'
+            // After successful sign-in, redirect to dashboard
+            if (url === baseUrl || url === `${baseUrl}/sign-in`) {
+                return `${baseUrl}/dashboard`
+            }
+            // After sign-out, redirect to homepage
+            if (url.includes('/signout') || url.includes('/sign-out')) {
+                return baseUrl
+            }
+            return url
         },
-        async jwt(token: JWT, user?: User): Promise<JWT> {
+        async jwt({ token, user }) {
             if (user) {
-                token._id = user._id?.toString()
+                token._id = user._id
                 token.isVerified = user.isVerified
+                token.email = user.email
                 token.isAcceptingMessages = user.isAcceptingMessages
                 token.username = user.username
             }
             return token
         },
         async session({ session, token }) {
-            if (token) {
-                session.user._id = token._id
-                session.user.isVerified = token.isVerified
-                session.user.isAcceptingMessages = token.isAcceptingMessages
-                session.user.username = token.username
+            if (token && session.user) {
+                session.user._id = token._id as string
+                session.user.email = token.email as string
+                session.user.username = token.username as string
+                session.user.isVerified = token.isVerified as boolean
+                session.user.isAcceptingMessages = token.isAcceptingMessages as boolean
             }
             return session
         }
     },
     pages: {
         signIn: '/sign-in',
+        signOut: '/',
     },
     session: {
         strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     secret: process.env.SECRET,
 }
