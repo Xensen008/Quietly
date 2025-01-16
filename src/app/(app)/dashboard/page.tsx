@@ -68,7 +68,7 @@ const page = () => {
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>
       toast({
-        title: 'Error',
+        title: 'Error in getting message',
         description: axiosError.response?.data.message ||"Failed to fetch messages",
         variant: 'destructive'
       })
@@ -118,12 +118,48 @@ const page = () => {
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
   const profileUrl = `${baseUrl}/u/${username}`;
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(profileUrl);
-    toast({
-      title: 'URL Copied!',
-      description: 'Profile URL has been copied to clipboard.',
-    });
+  // useEffect(() => {
+  //   // Set profile URL after component mounts
+  //   if (session?.user?.username) {
+  //     const baseUrl = window.location.origin
+  //     setProfileUrl(`${baseUrl}/u/${session.user.username}`)
+  //   }
+  // }, [session?.user?.username])
+
+  const copyToClipboard = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        // For HTTPS or localhost
+        await navigator.clipboard.writeText(profileUrl);
+      } else {
+        // Fallback for HTTP
+        const textArea = document.createElement("textarea");
+        textArea.value = profileUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          textArea.remove();
+        } catch (error) {
+          console.error('Failed to copy text:', error);
+          throw new Error('Copy failed');
+        }
+      }
+      toast({
+        title: 'URL Copied!',
+        description: 'Profile URL has been copied to clipboard.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Copy failed',
+        description: 'Failed to copy URL to clipboard.',
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
