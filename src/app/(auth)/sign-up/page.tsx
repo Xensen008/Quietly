@@ -69,7 +69,7 @@ const page = () => {
     checkUsernameUnique()
   }, [debouncedUsername])
 
-  const onSubmit = async(data: z.infer<typeof signupSchema>) =>{
+  const onSubmit = async(data: z.infer<typeof signupSchema>) => {
     setIsSubmitting(true)
     try {
       const response = await axios.post<ApiResponse>('/api/sign-up', data)
@@ -77,9 +77,10 @@ const page = () => {
         title: 'Success',
         description: response?.data?.message
       })
-      router.replace(`/verify/${username}`)
+      // Fix: Use the entered username from form data
+      router.push(`/verify/${data.username}`)
       setIsSubmitting(false)  
-    }catch (error:any){ 
+    } catch (error:any) {
       console.error("Error in Signup page" , error)
       const axiosError = error as AxiosError<ApiResponse>;
       if (axiosError.response?.status === 400){

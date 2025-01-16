@@ -55,23 +55,30 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async redirect({ url, baseUrl }) {
-            // After successful sign-in, redirect to dashboard
-            if (url === baseUrl || url === `${baseUrl}/sign-in`) {
-                return `${baseUrl}/dashboard`
+            // Allow verify page access
+            if (url.includes('/verify/')) {
+                return url;
             }
-            // After sign-out, redirect to homepage
-            if (url.includes('/signout') || url.includes('/sign-out')) {
-                return baseUrl
+            
+            // Handle successful sign-in
+            if (url === `${baseUrl}/sign-in`) {
+                return `${baseUrl}/dashboard`;
             }
-            return url
+            
+            // Default redirect
+            return url.startsWith(baseUrl) ? url : baseUrl;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token._id = user._id
                 token.isVerified = user.isVerified
                 token.email = user.email
                 token.isAcceptingMessages = user.isAcceptingMessages
                 token.username = user.username
+            }
+            // Handle user updates
+            if (trigger === "update" && session) {
+                return { ...token, ...session.user }
             }
             return token
         },
