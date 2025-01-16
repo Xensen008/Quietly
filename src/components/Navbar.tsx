@@ -36,6 +36,9 @@ const Navbar = () => {
                         <span className="text-sm">
                             Welcome, {session.user.username || session.user.email}
                         </span>
+                        <Link href="/dashboard">
+                            <Button>Dashboard</Button>
+                        </Link>
                         <Button 
                             onClick={handleSignOut} 
                             variant="outline"
