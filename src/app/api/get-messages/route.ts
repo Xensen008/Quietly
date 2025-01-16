@@ -10,12 +10,25 @@ export async function GET(request:Request){
     await dbConnect();
     const session = await getServerSession(authOptions);
     const user: User = session?.user as User;
+    
+    console.log('Session:', session);
+    console.log('User:', user);
+    
     if(!session || !session.user){
         return Response.json({
             success: false,
             message: "Not Authenticated Please log in first" 
         },{
-            status: 404
+            status: 401
+        })
+    }
+
+    if(!user._id) {
+        return Response.json({
+            success: false,
+            message: "User ID not found in session" 
+        },{
+            status: 400
         })
     }
 
@@ -30,10 +43,10 @@ export async function GET(request:Request){
         if (!user || user.length === 0) {
             return Response.json(
                 {
-                    success:false,
-                    message: "User/message Not found"
+                    success: true,
+                    messages: []
                 },
-                {status:401}
+                {status: 200}
             )
         }
         return Response.json({

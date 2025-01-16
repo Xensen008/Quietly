@@ -9,6 +9,15 @@ export async function middleware(request: NextRequest) {
   
   const url = request.nextUrl;
 
+  // Auth routes that should not be accessible if logged in
+  if (url.pathname.startsWith('/sign-in') || 
+      url.pathname.startsWith('/sign-up') || 
+      url.pathname.startsWith('/verify')) {
+    if (token) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  }
+
   // Protected routes require authentication
   if (url.pathname.startsWith('/dashboard')) {
     if (!token) {
@@ -22,6 +31,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*'
+    '/dashboard/:path*',
+    '/sign-in',
+    '/sign-up',
+    '/verify/:path*'
   ],
 };

@@ -16,11 +16,9 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" >
-        <body className={inter.className}>
-          <Navbar/>
-          {children}
-        </body>
-    </html>
+    <div className={inter.className}>
+      <Navbar/>
+      {children}
+    </div>
   );
 }

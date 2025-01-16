@@ -16,6 +16,7 @@ import { useSession } from 'next-auth/react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import Link from 'next/link'
 
 const page = () => {
   const [messages, setMessages] = useState<Message[]>([])
@@ -57,7 +58,9 @@ const page = () => {
     setIsLoading(true)
     setIsSwitchLoading(true)
     try {
-      const response = await axios.get<ApiResponse>('/api/get-messages')
+      const response = await axios.get<ApiResponse>('/api/get-messages', {
+        withCredentials: true
+      })
       setMessages(response?.data?.messages || [])
       if(refresh){
         toast({
@@ -94,7 +97,7 @@ const page = () => {
       })
       setValue('acceptMessage', !acceptMessage)
       toast({
-        title: response.data.message,
+        title: "Updated",
         description: response.data.message
       })
     } catch (error) {
@@ -110,7 +113,24 @@ const page = () => {
   }
 
   if(!session || !session.user){
-    return <div>Not Authenticated please Login</div>
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="text-center p-8 rounded-lg bg-white shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Authentication Required
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Please sign in to access your dashboard
+          </p>
+          <Link 
+            href="/sign-in" 
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const { username } = session.user as User;
