@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -22,7 +22,7 @@ import { Loader2 } from 'lucide-react'
 import { signinSchema } from '@/schemas/signinSchema'
 
 
-const page = () => {
+export default function Page() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -67,7 +67,7 @@ const page = () => {
       });
 
      router.replace("/dashboard");
-    } catch (error) {
+    } catch (_) {
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -141,4 +141,3 @@ const page = () => {
   )
 }
 
-export default page

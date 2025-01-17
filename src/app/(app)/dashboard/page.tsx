@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 
-const page = () => {
+export default function  Page() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSwitchLoading, setIsSwitchLoading] =useState<boolean>(false)
@@ -50,7 +50,7 @@ const page = () => {
     } finally {
       setIsSwitchLoading(false)
     }
-  }, [setValue])
+  }, [setValue, toast])
 
   const fetchMessages = useCallback( async(refresh: boolean = false )=>{
     setIsLoading(true)
@@ -78,7 +78,7 @@ const page = () => {
       setIsSwitchLoading(false)
     }
     }
-  }, [setIsLoading, setMessages])
+  }, [setIsLoading, setMessages, toast])
 
   useEffect(() => {
     if(!session || !session.user) return
@@ -171,7 +171,7 @@ const page = () => {
         title: 'URL Copied!',
         description: 'Profile URL has been copied to clipboard.',
       });
-    } catch (error) {
+    } catch (_) {
       toast({
         title: 'Copy failed',
         description: 'Failed to copy URL to clipboard.',
@@ -226,7 +226,7 @@ const page = () => {
       </Button>
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
         {messages.length > 0 ? (
-          messages.map((message, index) => (
+          messages.map((message) => (
             <MessageCard
               key={message._id}
               message={message}
@@ -242,4 +242,4 @@ const page = () => {
 }
 
 
-export default page
+// export default page

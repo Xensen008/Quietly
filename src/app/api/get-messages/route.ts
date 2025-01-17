@@ -6,7 +6,7 @@ import { User } from "next-auth";
 import mongoose from "mongoose";
 
 
-export async function GET(request:Request){
+export async function GET(){
     await dbConnect();
     const session = await getServerSession(authOptions);
     const user: User = session?.user as User;
@@ -55,7 +55,7 @@ export async function GET(request:Request){
         },{
             status: 200 
         })
-    } catch (error) {
+    } catch (_) {
         return Response.json({
             success:false,
             message: "Failed to get messages"

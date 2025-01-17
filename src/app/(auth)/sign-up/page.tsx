@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react'
 
 
-const page = () => {
+export default function Page() {
   const [username, setUsername] = useState('')
   const [usernameMessage, setUsernameMessage] = useState('')
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
@@ -80,7 +80,7 @@ const page = () => {
       // Fix: Use the entered username from form data
       router.push(`/verify/${data.username}`)
       setIsSubmitting(false)  
-    } catch (error:any) {
+    } catch (error:unknown) {
       console.error("Error in Signup page" , error)
       const axiosError = error as AxiosError<ApiResponse>;
       if (axiosError.response?.status === 400){
@@ -188,4 +188,4 @@ const page = () => {
   )
 }
 
-export default page
+// export default page
