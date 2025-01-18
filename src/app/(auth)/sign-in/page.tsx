@@ -8,7 +8,6 @@ import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -18,19 +17,21 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageSquare } from 'lucide-react'
 import { signinSchema } from '@/schemas/signinSchema'
+import { motion } from 'framer-motion'
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 }
+};
 
 export default function Page() {
-
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const { toast } = useToast()
   const router = useRouter()
 
-
-  // ZOD implementation
   const form = useForm<z.infer<typeof signinSchema>>({
     resolver: zodResolver(signinSchema),
     defaultValues: {
@@ -39,7 +40,6 @@ export default function Page() {
     }
   })
 
-
   const onSubmit = async (data: z.infer<typeof signinSchema>) => {
     setIsSubmitting(true);
     try {
@@ -47,7 +47,6 @@ export default function Page() {
         identifier: data.identifier,
         password: data.password,
         redirect: false,
-        
       });
 
       if (result?.error) {
@@ -66,7 +65,7 @@ export default function Page() {
         className: "bg-green-500 border-green-600"
       });
 
-     router.replace("/dashboard");
+      router.replace("/dashboard");
     } catch (_) {
       toast({
         title: "Error",
@@ -79,63 +78,104 @@ export default function Page() {
   };
 
   return (
-    <div className='flex justify-center items-center min-h-screen bg-gray-100'>
-      <div className='w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md'>
-        <div className='text-center'>
-          <h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl mb-6'>
-            Welcome to Quietly
-          </h1>
-          <p className='mb-4'>
-            Login to start your anonymous journey
-          </p>
-        </div>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
+      
+      <div className="min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-full max-w-md"
+        >
+          <motion.div
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            className="bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 shadow-xl p-6 sm:p-8 space-y-6"
+          >
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <div className="flex justify-center mb-4">
+                <div className="p-2.5 rounded-xl bg-purple-500/20">
+                  <MessageSquare className="w-8 h-8 text-purple-200" />
+                </div>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
+                Welcome Back
+              </h1>
+              <p className="text-sm sm:text-base text-gray-300">
+                Sign in to continue your anonymous journey
+              </p>
+            </div>
 
-        {/* form */}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              name="identifier"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email/Username</FormLabel>
-                  <Input placeholder='enter your username or email'{...field} name="identifier" />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Form */}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  name="identifier"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-200">Email/Username</FormLabel>
+                      <Input 
+                        placeholder="Enter your username or email" 
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-purple-500"
+                        {...field} 
+                        name="identifier" 
+                      />
+                      <FormMessage className="text-pink-200" />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              name="password"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <Input type="password" {...field} name="password" />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className='w-full' disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </Button>
-          </form>
-        </Form>
-        <div className="text-center mt-4">
-          <p>
-            New here ? create an account{' '}
-            <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
-              Sign up
-            </Link>
-          </p>
-        </div>
+                <FormField
+                  name="password"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-200">Password</FormLabel>
+                      <Input 
+                        type="password" 
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-purple-500"
+                        {...field} 
+                        name="password" 
+                      />
+                      <FormMessage className="text-pink-200" />
+                    </FormItem>
+                  )}
+                />
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm shadow-md h-10"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
+                </Button>
+              </form>
+            </Form>
+
+            {/* Footer */}
+            <div className="text-center pt-2">
+              <p className="text-gray-300 text-sm">
+                New here?{' '}
+                <Link 
+                  href="/sign-up" 
+                  className="text-purple-300 hover:text-purple-200 transition-colors font-medium"
+                >
+                  Create an account
+                </Link>
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   )
