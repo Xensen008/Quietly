@@ -9,14 +9,27 @@ import { acceptMessageSchema } from '@/schemas/acceptMessageSchema'
 import { ApiResponse } from '@/types/ApiResponse'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios, { AxiosError } from 'axios'
-import { Loader2, RefreshCcw } from 'lucide-react'
+import { Loader2, RefreshCcw, Link2, Copy, MessageSquare } from 'lucide-react'
 import { User } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
-export default function  Page() {
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 }
+};
+
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.8 }
+};
+
+export default function Page() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSwitchLoading, setIsSwitchLoading] =useState<boolean>(false)
@@ -112,37 +125,35 @@ export default function  Page() {
 
   if(!session || !session.user){
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="text-center p-8 rounded-lg bg-white shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center p-8 rounded-xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl"
+        >
+          <h2 className="text-2xl font-bold text-white mb-4">
             Authentication Required
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-300 mb-6">
             Please sign in to access your dashboard
           </p>
-          <Link 
-            href="/sign-in" 
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
-          >
-            Sign In
+          <Link href="/sign-in">
+            <Button 
+              className="relative overflow-hidden group bg-white/10 hover:bg-white/15 text-white border-0 transition-all duration-300 text-base px-8 py-6 h-auto"
+            >
+              <span className="relative z-10 font-medium">Sign In</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm"></div>
+              <div className="absolute inset-0 border border-white/10 rounded-lg group-hover:border-white/20 transition-colors duration-300"></div>
+            </Button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
   const { username } = session.user as User;
-
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
   const profileUrl = `${baseUrl}/u/${username}`;
-
-  // useEffect(() => {
-  //   // Set profile URL after component mounts
-  //   if (session?.user?.username) {
-  //     const baseUrl = window.location.origin
-  //     setProfileUrl(`${baseUrl}/u/${session.user.username}`)
-  //   }
-  // }, [session?.user?.username])
 
   const copyToClipboard = async () => {
     try {
@@ -181,61 +192,184 @@ export default function  Page() {
   };
 
   return (
-    <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
-      <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
+      
+      <div className="min-h-screen flex items-center justify-center py-16 sm:py-20">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-full relative px-3 sm:px-6 lg:px-8 max-w-[90rem] mx-auto"
+        >
+          {/* Header Section */}
+          <motion.div 
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            className="mb-6 sm:mb-8 lg:mb-10"
+          >
+            <div className="max-w-2xl mx-auto lg:mx-0">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white mb-2">
+                Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">{username}</span>
+              </h1>
+              <p className="text-sm sm:text-base text-gray-200">
+                Manage your messages and settings here
+              </p>
+            </div>
+          </motion.div>
 
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>{' '}
-        <div className="flex items-center">
-          <input
-            type="text"
-            value={profileUrl}
-            disabled
-            className="input input-bordered w-full p-2 mr-2"
-          />
-          <Button onClick={copyToClipboard}>Copy</Button>
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3 sm:gap-4 xl:gap-6">
+            {/* Left Column - Settings & Stats */}
+            <div className="md:col-span-1 xl:col-span-4 space-y-3 sm:space-y-4 xl:space-y-6">
+              {/* Profile Link Card */}
+              <motion.div 
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+              >
+                <div className="p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
+                      <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
+                    </div>
+                    <h2 className="text-sm sm:text-base font-medium text-white">Share Your Link</h2>
+                  </div>
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="p-2 sm:p-3 bg-black/20 rounded-md font-mono text-[11px] sm:text-sm text-purple-100 break-all border border-white/20">
+                      {profileUrl}
+                    </div>
+                    <Button
+                      onClick={copyToClipboard}
+                      className="w-full h-8 sm:h-10 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-xs sm:text-sm shadow-md"
+                    >
+                      <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
 
-      <div className="mb-4">
-        <Switch
-          {...register('acceptMessages')}
-          checked={acceptMessage}
-          onCheckedChange={handleSwitchChange}
-          disabled={isSwitchLoading}
-        />
-        <span className="ml-2">
-          Accept Messages: {acceptMessage ? 'On' : 'Off'}
-        </span>
-      </div>
-      <Separator />
+              {/* Settings Card */}
+              <motion.div 
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+              >
+                <div className="p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
+                      <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
+                    </div>
+                    <h2 className="text-sm sm:text-base font-medium text-white">Message Settings</h2>
+                  </div>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                        <label className="text-xs sm:text-sm text-gray-100">Accept Messages</label>
+                        <Switch
+                          {...register('acceptMessages')}
+                          checked={acceptMessage}
+                          onCheckedChange={handleSwitchChange}
+                          disabled={isSwitchLoading}
+                          className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-white/20 scale-90 sm:scale-100"
+                        />
+                      </div>
+                      <p className="text-[11px] sm:text-sm text-gray-300">
+                        {acceptMessage 
+                          ? 'Your feedback link is active' 
+                          : 'Your feedback link is disabled'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
 
-      <Button
-        className="mt-4"
-        variant="outline"
-        onClick={(e) => {
-          e.preventDefault();
-          fetchMessages(true);
-        }}
-      >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <RefreshCcw className="h-4 w-4" />
-        )}
-      </Button>
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {messages.length > 0 ? (
-          messages.map((message) => (
-            <MessageCard
-              key={message._id}
-              message={message}
-              onMessageDelete={handleDeleteMessage}
-            />
-          ))
-        ) : (
-          <p>No messages to display.</p>
-        )}
+            {/* Right Column - Messages */}
+            <div className="md:col-span-1 xl:col-span-8">
+              <motion.div 
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+                className="h-full"
+              >
+                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
+                        <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm sm:text-base font-medium text-white">Messages</h2>
+                        {messages.length > 0 && (
+                          <p className="text-[11px] sm:text-sm text-gray-300 mt-0.5">
+                            {messages.length} message{messages.length !== 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        fetchMessages(true);
+                      }}
+                      className="p-1.5 sm:p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                      ) : (
+                        <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3 sm:space-y-4">
+                    {messages.length > 0 ? (
+                      <motion.div 
+                        variants={fadeIn}
+                        initial="initial"
+                        animate="animate"
+                        className="grid gap-3 sm:gap-4"
+                      >
+                        {messages.map((message) => (
+                          <motion.div
+                            key={message._id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <MessageCard
+                              message={message}
+                              onMessageDelete={handleDeleteMessage}
+                            />
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        variants={fadeIn}
+                        initial="initial"
+                        animate="animate"
+                        className="flex flex-col items-center justify-center py-6 sm:py-8 xl:py-12 px-4"
+                      >
+                        <div className="p-2 sm:p-3 rounded-md bg-purple-500/20 mb-3 sm:mb-4">
+                          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-purple-200" />
+                        </div>
+                        <h3 className="text-sm sm:text-base font-medium text-white mb-1">No messages yet</h3>
+                        <p className="text-[11px] sm:text-sm text-gray-300 text-center max-w-sm">
+                          Share your link to receive anonymous feedback
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
