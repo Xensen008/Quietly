@@ -138,11 +138,22 @@ export default function SendMessage() {
                     name="content"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm sm:text-base text-gray-200">Your Message</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-sm sm:text-base text-gray-200">Your Message</FormLabel>
+                          <span className="text-xs text-gray-400">{field.value?.length || 0}/500</span>
+                        </div>
                         <FormControl>
                           <Textarea
                             placeholder="Write your anonymous message here..."
-                            className="min-h-[120px] bg-black/20 border-white/20 text-gray-100 placeholder:text-gray-400 resize-none focus-visible:ring-purple-500"
+                            className="min-h-[200px] bg-black/20 border-white/20 text-gray-100 placeholder:text-gray-400 resize-none focus-visible:ring-purple-500 h-auto"
+                            maxLength={500}
+                            rows={8}
+                            onKeyDown={(e) => {
+                              const value = e.currentTarget.value;
+                              if (value.length >= 500 && e.key !== 'Backspace' && e.key !== 'Delete' && !e.metaKey && !e.ctrlKey) {
+                                e.preventDefault();
+                              }
+                            }}
                             {...field}
                           />
                         </FormControl>

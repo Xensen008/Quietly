@@ -293,7 +293,7 @@ export default function Page() {
                 animate="animate"
                 className="h-full"
               >
-                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg overflow-hidden">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <div className="flex items-center gap-2 sm:gap-3">
                       <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
@@ -325,13 +325,13 @@ export default function Page() {
                     </Button>
                   </div>
 
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-3 sm:space-y-4 overflow-hidden">
                     {messages.length > 0 ? (
                       <motion.div 
                         variants={fadeIn}
                         initial="initial"
                         animate="animate"
-                        className="grid gap-3 sm:gap-4"
+                        className="grid gap-3 sm:gap-4 w-full"
                       >
                         {messages.map((message) => (
                           <motion.div
@@ -340,6 +340,7 @@ export default function Page() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
+                            className="w-full min-w-0"
                           >
                             <MessageCard
                               message={message}

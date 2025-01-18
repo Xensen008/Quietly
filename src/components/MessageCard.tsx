@@ -62,39 +62,43 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
         <div className="p-4 sm:p-5 space-y-4">
           {/* Message Content */}
           <div className="flex justify-between items-start gap-4">
-            <p className="text-base sm:text-lg text-white font-normal leading-relaxed break-words flex-grow">
-              {message.content}
-            </p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 h-8 w-8 bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-gray-300 hover:scale-105 active:scale-95"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-black/95 border border-white/10 backdrop-blur-xl max-w-[90%] w-full sm:max-w-lg mx-auto">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-lg text-white">Delete Message?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-200 text-base">
-                    This action cannot be undone. This message will be permanently deleted.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="sm:space-x-2">
-                  <AlertDialogCancel className="bg-white/5 text-white  border-white/10 text-base font-normal">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleDeleteConfirm}
-                    className="bg-red-500/10 text-red-200 hover:bg-red-500/20 border border-red-500/20 text-base font-normal"
+            <div className="flex-grow min-w-0">
+              <p className="text-base sm:text-lg text-white font-normal leading-relaxed break-all whitespace-pre-wrap line-clamp-[12] hover:line-clamp-none transition-all duration-300">
+                {message.content}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 h-8 w-8 bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-gray-300 hover:scale-105 active:scale-95"
                   >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-black/95 border border-white/10 backdrop-blur-xl max-w-[90%] w-full sm:max-w-lg mx-auto">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg text-white">Delete Message?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-200 text-base">
+                      This action cannot be undone. This message will be permanently deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="sm:space-x-2">
+                    <AlertDialogCancel className="bg-white/5 text-white border-white/10 text-base font-normal">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleDeleteConfirm}
+                      className="bg-red-500/10 text-red-200 hover:bg-red-500/20 border border-red-500/20 text-base font-normal"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
 
           {/* Timestamp */}
