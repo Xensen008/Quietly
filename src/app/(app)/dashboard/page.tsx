@@ -193,6 +193,22 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
+      <style jsx global>{`
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.2);
+          border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.3);
+        }
+      `}</style>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
       
       <div className="min-h-screen flex items-center justify-center py-16 sm:py-20">
@@ -218,16 +234,16 @@ export default function Page() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3 sm:gap-4 xl:gap-6">
-            {/* Left Column - Settings & Stats */}
-            <div className="md:col-span-1 xl:col-span-4 space-y-3 sm:space-y-4 xl:space-y-6">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:gap-6">
+            {/* First Row - Profile Link and Settings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 xl:gap-6">
               {/* Profile Link Card */}
               <motion.div 
                 variants={fadeInUp}
                 initial="initial"
                 animate="animate"
               >
-                <div className="p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
                       <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
@@ -255,7 +271,7 @@ export default function Page() {
                 initial="initial"
                 animate="animate"
               >
-                <div className="p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
                       <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
@@ -285,90 +301,88 @@ export default function Page() {
               </motion.div>
             </div>
 
-            {/* Right Column - Messages */}
-            <div className="md:col-span-1 xl:col-span-8">
-              <motion.div 
-                variants={fadeInUp}
-                initial="initial"
-                animate="animate"
-                className="h-full"
-              >
-                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg overflow-hidden">
-                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
-                        <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
-                      </div>
-                      <div>
-                        <h2 className="text-sm sm:text-base font-medium text-white">Messages</h2>
-                        {messages.length > 0 && (
-                          <p className="text-[11px] sm:text-sm text-gray-300 mt-0.5">
-                            {messages.length} message{messages.length !== 1 ? 's' : ''}
-                          </p>
-                        )}
-                      </div>
+            {/* Second Row - Messages */}
+            <motion.div 
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+              className="h-full"
+            >
+              <div className="h-[calc(100vh-12rem)] p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
+                      <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        fetchMessages(true);
-                      }}
-                      className="p-1.5 sm:p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-                      ) : (
-                        <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3 sm:space-y-4 overflow-hidden">
-                    {messages.length > 0 ? (
-                      <motion.div 
-                        variants={fadeIn}
-                        initial="initial"
-                        animate="animate"
-                        className="grid gap-3 sm:gap-4 w-full"
-                      >
-                        {messages.map((message) => (
-                          <motion.div
-                            key={message._id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="w-full min-w-0"
-                          >
-                            <MessageCard
-                              message={message}
-                              onMessageDelete={handleDeleteMessage}
-                            />
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        variants={fadeIn}
-                        initial="initial"
-                        animate="animate"
-                        className="flex flex-col items-center justify-center py-6 sm:py-8 xl:py-12 px-4"
-                      >
-                        <div className="p-2 sm:p-3 rounded-md bg-purple-500/20 mb-3 sm:mb-4">
-                          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-purple-200" />
-                        </div>
-                        <h3 className="text-sm sm:text-base font-medium text-white mb-1">No messages yet</h3>
-                        <p className="text-[11px] sm:text-sm text-gray-300 text-center max-w-sm">
-                          Share your link to receive anonymous feedback
+                    <div>
+                      <h2 className="text-sm sm:text-base font-medium text-white">Messages</h2>
+                      {messages.length > 0 && (
+                        <p className="text-[11px] sm:text-sm text-gray-300 mt-0.5">
+                          {messages.length} message{messages.length !== 1 ? 's' : ''}
                         </p>
-                      </motion.div>
-                    )}
+                      )}
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      fetchMessages(true);
+                    }}
+                    className="p-1.5 sm:p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                    ) : (
+                      <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    )}
+                  </Button>
                 </div>
-              </motion.div>
-            </div>
+
+                <div className="h-[calc(100%-4rem)] overflow-y-auto pr-2 space-y-0 sm:space-y-0 scrollbar-thin scrollbar-thumb-purple-300/20 hover:scrollbar-thumb-purple-300/30 scrollbar-track-white/5 hover:scrollbar-track-white/10 transition-colors">
+                  {messages.length > 0 ? (
+                    <motion.div 
+                      variants={fadeIn}
+                      initial="initial"
+                      animate="animate"
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
+                    >
+                      {messages.map((message) => (
+                        <motion.div
+                          key={message._id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="w-full min-w-0"
+                        >
+                          <MessageCard
+                            message={message}
+                            onMessageDelete={handleDeleteMessage}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      variants={fadeIn}
+                      initial="initial"
+                      animate="animate"
+                      className="flex flex-col items-center justify-center h-full py-6 sm:py-8 xl:py-12 px-4"
+                    >
+                      <div className="p-2 sm:p-3 rounded-md bg-purple-500/20 mb-3 sm:mb-4">
+                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-purple-200" />
+                      </div>
+                      <h3 className="text-sm sm:text-base font-medium text-white mb-1">No messages yet</h3>
+                      <p className="text-[11px] sm:text-sm text-gray-300 text-center max-w-sm">
+                        Share your link to receive anonymous feedback
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </div>
