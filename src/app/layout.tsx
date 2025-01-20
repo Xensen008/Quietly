@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+// import { Toaster } from '@/components/ui/toaster';
 import AuthProvider from '@/context/AuthProvider';
 import Navbar from '@/components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Quietly - Anonymous Feedback Platform',
+  title: 'Quietly - Share secrets Quietly',
   description: 'Share and receive anonymous feedback with ease.',
 };
 
@@ -51,9 +51,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <Navbar />
           {children}
-          <Toaster />
         </AuthProvider>
       </body>
     </html>

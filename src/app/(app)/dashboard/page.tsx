@@ -1,7 +1,7 @@
 'use client'
 import { MessageCard } from '@/components/MessageCard'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+// import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
 import { Message } from '@/models/User.model'
@@ -40,7 +40,7 @@ export default function Page() {
     setMessages(messages.filter((message) => message._id !== messageId))
   }
 
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const form = useForm({
     resolver: zodResolver(acceptMessageSchema)
   })
@@ -225,7 +225,7 @@ export default function Page() {
             className="mb-6 sm:mb-8 lg:mb-10"
           >
             <div className="max-w-2xl mx-auto lg:mx-0">
-              <h1 className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white mb-2">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white mt-10 mb-2">
                 Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">{username}</span>
               </h1>
               <p className="text-sm sm:text-base text-gray-200">
