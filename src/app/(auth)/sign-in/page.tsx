@@ -51,26 +51,30 @@ export default function Page() {
 
       if (result?.error) {
         toast({
-          title: "Login Failed",
+          title: "Authentication Failed",
           description: result.error,
-          variant: "destructive"
+          variant: "destructive",
+          duration: 3000,
         });
         setIsSubmitting(false);
         return;
       }
 
-      toast({
-        title: "Welcome back! 👋",
-        description: "Successfully logged in",
-        className: "bg-green-500 border-green-600"
-      });
-
-      router.replace("/dashboard");
-    } catch (_) {
+      if (result?.ok) {
+        toast({
+          title: "Welcome back! 👋",
+          description: "Successfully logged in",
+          className: "bg-green-500 border-green-600",
+          duration: 3000,
+        });
+        router.replace("/dashboard");
+      }
+    } catch (error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 3000,
       });
     } finally {
       setIsSubmitting(false);
