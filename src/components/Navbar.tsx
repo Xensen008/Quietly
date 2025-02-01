@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from './ui/button'
@@ -9,6 +9,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 const Navbar = () => {
     const { data: session, status } = useSession()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isScrolled, setIsScrolled] = useState(false)
+    const [scrollProgress, setScrollProgress] = useState(0)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            // Calculate scroll percentage for the first 60px (reduced from 100px for faster response)
+            const newScrollProgress = Math.min(window.scrollY / 60, 1)
+            setScrollProgress(newScrollProgress)
+            setIsScrolled(window.scrollY > 10)  // Reduced threshold for faster response
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })  // Added passive for better performance
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     const handleSignOut = async () => {
         await signOut({ 
@@ -36,12 +50,23 @@ const Navbar = () => {
         <motion.nav 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed top-0 left-0 right-0 z-50"
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
+            style={{
+                background: `rgba(15, 23, 42, ${scrollProgress * 0.95})`,
+                backdropFilter: `blur(${scrollProgress * 8}px)`,
+                boxShadow: `0 ${scrollProgress * 8}px ${scrollProgress * 12}px -${scrollProgress * 4}px rgba(0, 0, 0, ${scrollProgress * 0.2})`
+            }}
         >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent"></div>
+            <div 
+                className="absolute inset-0 transition-opacity duration-200"
+                style={{
+                    opacity: 1 - scrollProgress,
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)'
+                }}
+            ></div>
             <div className="relative">
-                <div className="container mx-auto py-4 md:py-6">
-                    <div className="flex justify-between items-center px-4">
+                <div className="container mx-auto py-4 md:py-5">
+                    <div className="flex justify-between items-center px-4 h-[40px] md:h-[48px]">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
