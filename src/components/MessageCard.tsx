@@ -28,6 +28,8 @@ type MessageCardProps = {
   onMessageDelete: (messageId: string) => void;
 };
 
+
+//change
 export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
   const { toast } = useToast();
   const messageCardRef = useRef<HTMLDivElement>(null);
