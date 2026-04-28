@@ -1,5 +1,5 @@
-import {NextAuthOptions} from 'next-auth'
-import  CredentialsProvider  from 'next-auth/providers/credentials'
+import { NextAuthOptions } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
 import dbConnect from '@/lib/dbConnect'
 // import { JWT } from 'next-auth/jwt'
 import bcrypt from 'bcryptjs'
@@ -8,13 +8,13 @@ import UserModel from '@/models/User.model'
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            id:"credentials",
-            name:"Credentials",
+            id: "credentials",
+            name: "Credentials",
             credentials: {
                 identifier: { label: "Email or Username", type: "text" },
                 password: { label: "Password", type: "password" }
-              },
-              async authorize(credentials:any): Promise<any> {
+            },
+            async authorize(credentials: any): Promise<any> {
                 if (!credentials?.identifier || !credentials?.password) {
                     throw new Error("Missing credentials");
                 }
@@ -22,19 +22,19 @@ export const authOptions: NextAuthOptions = {
                 try {
                     const user = await UserModel.findOne({
                         $or: [
-                            {email: credentials.identifier},
-                            {username: credentials.identifier}
+                            { email: credentials.identifier },
+                            { username: credentials.identifier }
                         ]
                     })
-                    if(!user){
+                    if (!user) {
                         throw new Error("Invalid Credentials or no user found")
                     }
 
-                    if(!user.isVerified){
+                    if (!user.isVerified) {
                         throw new Error("User not verified Please verify your email first")
                     }
 
-                    const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password) 
+                    const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password)
                     if (isPasswordCorrect) {
                         return {
                             _id: user?._id?.toString(),
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
                     // console.log(err)
                     throw new Error(err.message)
                 }
-              }
+            }
         })
     ],
     callbacks: {
@@ -59,12 +59,12 @@ export const authOptions: NextAuthOptions = {
             if (url.includes('/verify/')) {
                 return url;
             }
-            
+
             // Handle successful sign-in
             if (url === `${baseUrl}/sign-in`) {
                 return `${baseUrl}/dashboard`;
             }
-            
+
             // Default redirect
             return url.startsWith(baseUrl) ? url : baseUrl;
         },
