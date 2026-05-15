@@ -8,7 +8,7 @@ export async function sendVerificationEmail(email: string,
 ): Promise<ApiResponse> {
     try {
         await resend.emails.send({
-            from: 'Quietly <no-reply@arnabjk008.tech>',
+            from: 'Quietly <no-reply@arnabjk008.dev>',
             to: email,
             subject: 'Quietly Verification code',
             react: VerificationEmail({
