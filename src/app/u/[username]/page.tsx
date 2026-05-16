@@ -36,6 +36,7 @@ export default function SendMessage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [isNotAccepting, setIsNotAccepting] = useState(false);
 
   useEffect(() => {
     setSuggestedMessages(getRandomSuggestions());
@@ -64,11 +65,16 @@ export default function SendMessage() {
       setTimeout(() => setSendSuccess(false), 2800);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
-      toast({
-        title: 'Error',
-        description: axiosError.response?.data.message ?? 'Failed to sent message',
-        variant: 'destructive',
-      });
+      const msg = axiosError.response?.data.message ?? '';
+      if (msg === 'User is not accepting messages') {
+        setIsNotAccepting(true);
+      } else {
+        toast({
+          title: 'Error',
+          description: msg || 'Failed to sent message',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +145,7 @@ export default function SendMessage() {
             transition={{ duration: 0.45, delay: 0.13 }}
             style={{
               background: '#FFFFFF',
-              border: `1.5px solid ${isFocused ? '#D4674F' : '#DDD5CE'}`,
+              border: `1.5px solid ${isNotAccepting ? '#DDD5CE' : (isFocused ? '#D4674F' : '#DDD5CE')}`,
               borderRadius: '16px',
               overflow: 'hidden',
               boxShadow: isFocused
@@ -150,6 +156,17 @@ export default function SendMessage() {
             }}
           >
             <Form {...form}>
+              {isNotAccepting ? (
+                <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '28px', marginBottom: '12px' }}>🔒</div>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: '#1C1410', margin: '0 0 6px' }}>
+                    Not accepting messages
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#8A7A74', margin: 0, lineHeight: 1.6 }}>
+                    @{username} has turned off anonymous messages for now.
+                  </p>
+                </div>
+              ) : (
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                   control={form.control}
@@ -266,6 +283,7 @@ export default function SendMessage() {
                   </AnimatePresence>
                 </div>
               </form>
+              )}
             </Form>
           </motion.div>
 
