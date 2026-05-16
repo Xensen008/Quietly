@@ -41,6 +41,7 @@ const Navbar = () => {
                 background: isScrolled ? 'rgba(250, 250, 248, 0.95)' : '#FAFAF8',
                 borderBottom: isScrolled ? '1px solid #E8E6E1' : '1px solid transparent',
                 backdropFilter: isScrolled ? 'blur(8px)' : 'none',
+                fontFamily: "'Space Mono', monospace",
             }}
         >
             <div className="container mx-auto px-6">
