@@ -378,7 +378,7 @@ export default function Page() {
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
-              height: '780px',
+              height: '860px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

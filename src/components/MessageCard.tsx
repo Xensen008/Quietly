@@ -224,10 +224,9 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
               fontFamily: "'Space Mono', monospace",
               margin: 0,
               wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
               overflow: expanded ? 'visible' : 'hidden',
               display: expanded ? 'block' : '-webkit-box',
-              WebkitLineClamp: expanded ? undefined : 4,
+              WebkitLineClamp: expanded ? undefined : 2,
               WebkitBoxOrient: expanded ? undefined : 'vertical',
             } as React.CSSProperties}
           >
