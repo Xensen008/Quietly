@@ -71,10 +71,6 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
         backgroundColor: null,
         scale: 3,
         logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector('[data-message-card]');
-          if (el) el.classList.add('screenshot-mode');
-        }
       });
       setIsCapturing(false);
       const link = document.createElement('a');
@@ -105,8 +101,6 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
       transition={{ duration: 0.2 }}
     >
       <style>{`
-        [data-message-card] .blob { display: none; }
-        [data-message-card].screenshot-mode .blob { display: block; }
         @media (max-width: 560px) {
           [data-message-card] { padding: 14px !important; }
         }
@@ -133,19 +127,19 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
         }}
       >
         <div
-          className="blob"
           style={{
             top: '-30px', right: '-20px', width: '120px', height: '120px',
             borderRadius: '50%', background: '#D4674F', filter: 'blur(50px)',
-            opacity: 0.22, position: 'absolute', pointerEvents: 'none',
+            opacity: isCapturing ? 0.22 : 0, position: 'absolute', pointerEvents: 'none',
+            transition: 'opacity 0s',
           }}
         />
         <div
-          className="blob"
           style={{
             bottom: '-20px', left: '-10px', width: '80px', height: '80px',
             borderRadius: '50%', background: '#F0A882', filter: 'blur(35px)',
-            opacity: 0.15, position: 'absolute', pointerEvents: 'none',
+            opacity: isCapturing ? 0.15 : 0, position: 'absolute', pointerEvents: 'none',
+            transition: 'opacity 0s',
           }}
         />
         <div
@@ -176,7 +170,7 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
           >
             {message.content}
           </p>
-          {isOverflowing && (
+          {isOverflowing && !isCapturing && (
             <button
               onClick={() => setExpanded(e => !e)}
               style={{
