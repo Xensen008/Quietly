@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -21,24 +21,25 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
 import { motion, AnimatePresence } from 'framer-motion';
+import suggestionsPool from '@/data/suggestions.json';
 
-const specialChar = '||';
-
-const parseStringMessages = (messageString: string): string[] => {
-  return messageString.split(specialChar);
+const getRandomSuggestions = (count = 3): string[] => {
+  const shuffled = [...suggestionsPool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
 };
-
-const initialMessageString =
-  "What's your favorite movie?||Do you have any pets?||What's your dream job?";
 
 export default function SendMessage() {
   const params = useParams<{ username: string }>();
   const username = params.username;
-  const [suggestedMessages, setSuggestedMessages] = useState<string>(initialMessageString);
+  const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
+
+  useEffect(() => {
+    setSuggestedMessages(getRandomSuggestions());
+  }, []);
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -73,22 +74,12 @@ export default function SendMessage() {
     }
   };
 
-  const fetchSuggestedMessages = async () => {
+  const shuffleSuggestions = () => {
     setIsSuggestLoading(true);
-    try {
-      const response = await fetch('/api/suggest-messages', { method: 'POST' });
-      const text = await response.text();
-      setSuggestedMessages(text);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch suggested messages',
-        variant: 'destructive',
-      });
-    } finally {
+    setTimeout(() => {
+      setSuggestedMessages(getRandomSuggestions());
       setIsSuggestLoading(false);
-    }
+    }, 300);
   };
 
   return (
@@ -293,7 +284,7 @@ export default function SendMessage() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={fetchSuggestedMessages}
+                onClick={shuffleSuggestions}
                 disabled={isSuggestLoading}
                 style={{
                   background: 'transparent',
@@ -314,45 +305,48 @@ export default function SendMessage() {
                 {isSuggestLoading ? (
                   <>
                     <Loader2 style={{ width: '10px', height: '10px' }} className="animate-spin" />
-                    Loading...
+                    shuffling...
                   </>
                 ) : (
-                  'Shuffle ideas'
+                  'shuffle'
                 )}
               </motion.button>
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {parseStringMessages(suggestedMessages).map((message, index) => (
-                <motion.button
-                  key={index}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.26 + index * 0.05, duration: 0.25 }}
-                  whileHover={{ scale: 1.03, backgroundColor: '#D4674F', color: '#FFFFFF', borderColor: '#D4674F' }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleMessageClick(message)}
-                  style={{
-                    background: '#FFF8F5',
-                    border: '1px solid #EDD8D0',
-                    borderRadius: '999px',
-                    padding: '6px 14px',
-                    fontSize: '12px',
-                    color: '#6B3D34',
-                    fontFamily: "'Space Mono', monospace",
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    lineHeight: '1.5',
-                    outline: 'none',
-                    WebkitTapHighlightColor: 'transparent',
-                    userSelect: 'none',
-                    display: 'inline-block',
-                    fontWeight: 500,
-                  }}
-                >
-                  {message}
-                </motion.button>
-              ))}
+              <AnimatePresence mode="popLayout">
+                {suggestedMessages.map((message, index) => (
+                  <motion.button
+                    key={message}
+                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.05, duration: 0.22 }}
+                    whileHover={{ scale: 1.03, backgroundColor: '#D4674F', color: '#FFFFFF', borderColor: '#D4674F' }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleMessageClick(message)}
+                    style={{
+                      background: '#FFF8F5',
+                      border: '1px solid #EDD8D0',
+                      borderRadius: '999px',
+                      padding: '6px 14px',
+                      fontSize: '12px',
+                      color: '#6B3D34',
+                      fontFamily: "'Space Mono', monospace",
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      lineHeight: '1.5',
+                      outline: 'none',
+                      WebkitTapHighlightColor: 'transparent',
+                      userSelect: 'none',
+                      display: 'inline-block',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {message}
+                  </motion.button>
+                ))}
+              </AnimatePresence>
             </div>
           </motion.div>
 
