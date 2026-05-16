@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from './ui/button'
-import { Loader2, MessageCircle, User, LogOut, Menu, X } from 'lucide-react'
+import { Loader2, MessageCircle, User, LogOut, Menu, X, Github } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Navbar = () => {
@@ -74,6 +74,9 @@ const Navbar = () => {
                     </div>
 
                     <div className="hidden md:flex items-center gap-4">
+                        <a href="https://github.com/xensen008/quietly" target="_blank" rel="noopener noreferrer" style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center' }}>
+                            <Github style={{ width: 17, height: 17 }} />
+                        </a>
                         {status === 'authenticated' && session?.user ? (
                             <>
                                 <div
@@ -143,6 +146,9 @@ const Navbar = () => {
                                 className="flex flex-col gap-2 pb-4 pt-2"
                                 style={{ borderTop: '1px solid #E8E6E1' }}
                             >
+                                <a href="https://github.com/xensen008/quietly" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-1" style={{ fontSize: '13px', color: '#6B7280' }}>
+                                    <Github style={{ width: 15, height: 15 }} /> GitHub
+                                </a>
                                 {status === 'authenticated' && session?.user ? (
                                     <>
                                         <div
