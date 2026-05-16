@@ -1,7 +1,5 @@
 'use client'
-import { Button } from '@/components/ui/button'
 import { Form, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { verifySchema } from '@/schemas/verifySchema'
 import { ApiResponse } from '@/types/ApiResponse'
@@ -13,12 +11,7 @@ import React, { useRef, KeyboardEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { motion } from 'framer-motion'
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 }
-};
+import Link from 'next/link'
 
 const VerifyAccount = () => {
   const router = useRouter()
@@ -33,26 +26,16 @@ const VerifyAccount = () => {
   })
 
   const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      value = value[0]
-    }
-
+    if (value.length > 1) value = value[0]
     const newOtp = [...otp]
     newOtp[index] = value
     setOtp(newOtp)
-
-    // Update form value
     form.setValue('code', newOtp.join(''))
-
-    // Auto focus next input
-    if (value !== '' && index < 5) {
-      inputRefs.current[index + 1]?.focus()
-    }
+    if (value !== '' && index < 5) inputRefs.current[index + 1]?.focus()
   }
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      // Focus previous input on backspace if current input is empty
       inputRefs.current[index - 1]?.focus()
     }
   }
@@ -61,21 +44,12 @@ const VerifyAccount = () => {
     e.preventDefault()
     const pastedData = e.clipboardData.getData('text')
     const pastedArray = pastedData.slice(0, 6).split('')
-    
     const newOtp = [...otp]
-    pastedArray.forEach((value, index) => {
-      if (index < 6) {
-        newOtp[index] = value
-      }
-    })
+    pastedArray.forEach((value, index) => { if (index < 6) newOtp[index] = value })
     setOtp(newOtp)
     form.setValue('code', newOtp.join(''))
-
-    // Focus last filled input or first empty input
     const lastFilledIndex = newOtp.findLastIndex(val => val !== '')
-    if (lastFilledIndex < 5) {
-      inputRefs.current[lastFilledIndex + 1]?.focus()
-    }
+    if (lastFilledIndex < 5) inputRefs.current[lastFilledIndex + 1]?.focus()
   }
 
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
@@ -85,16 +59,11 @@ const VerifyAccount = () => {
         username: param.username,
         code: data.code
       })
-
-      toast({
-        title: 'Account Verified',
-        description: response.data.message,
-      })
-
+      toast({ title: 'Account Verified', description: response.data.message })
       router.replace('/sign-in')
     } catch (error) {
       console.error("Error in verification page", error)
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<ApiResponse>
       if (axiosError.response?.status === 400) {
         toast({
           title: 'Error in verifying account',
@@ -108,108 +77,128 @@ const VerifyAccount = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
-      
-      <div className="min-h-screen flex items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="w-full max-w-md"
-        >
-          <motion.div
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-            className="bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 shadow-xl p-6 sm:p-8 space-y-6"
-          >
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <div className="flex justify-center mb-4">
-                <div className="p-2.5 rounded-xl bg-purple-500/20">
-                  <ShieldCheck className="w-8 h-8 text-purple-200" />
-                </div>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">
-                Verify Your Account
-              </h1>
-              <p className="text-sm sm:text-base text-gray-300">
-                Enter the verification code sent to your email
-              </p>
+    <div style={{ minHeight: '100vh', background: '#F5F0EC', fontFamily: "'Space Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{ width: '100%', maxWidth: '420px' }}
+      >
+        <div style={{ marginBottom: '36px', textAlign: 'center' }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '28px' }}>
+            <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: '21px', color: '#1C1410', letterSpacing: '-0.3px' }}>
+              Quietly
+            </span>
+          </Link>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(212,103,79,0.10)', border: '1px solid rgba(212,103,79,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShieldCheck style={{ width: '22px', height: '22px', color: '#D4674F' }} />
             </div>
+          </div>
+          <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#1C1410', margin: '0 0 8px', fontFamily: "'Space Mono', monospace" }}>
+            Verify your account
+          </h1>
+          <p style={{ fontSize: '13px', color: '#8A7A74', margin: 0, lineHeight: 1.6 }}>
+            Enter the 6-digit code sent to your email
+          </p>
+        </div>
 
-            {/* Form */}
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  name="code"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-200">Verification Code</FormLabel>
-                      <div className="flex gap-2 sm:gap-3 justify-center mt-2">
-                        {otp.map((digit, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                          >
-                            <Input
-                              ref={(el) => {
-                                inputRefs.current[index] = el;
-                                return undefined;
-                              }}
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              maxLength={1}
-                              value={digit}
-                              onChange={(e) => handleOtpChange(index, e.target.value)}
-                              onKeyDown={(e) => handleKeyDown(index, e)}
-                              onPaste={handlePaste}
-                              className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-semibold bg-black/20 border-white/20 text-white focus:border-purple-500/50 focus:ring-purple-500/50 transition-all duration-200"
-                            />
-                          </motion.div>
-                        ))}
-                      </div>
-                      <FormMessage className="text-pink-200 text-center mt-2" />
-                    </FormItem>
-                  )}
-                />
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD5CE', borderRadius: '16px', padding: '32px 28px', boxShadow: '0 2px 20px rgba(28,20,16,0.07)' }}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                name="code"
+                control={form.control}
+                render={() => (
+                  <FormItem>
+                    <FormLabel style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#A8412D', fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>
+                      Verification Code
+                    </FormLabel>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '14px', marginBottom: '6px' }}>
+                      {otp.map((digit, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.25, delay: index * 0.05 }}
+                        >
+                          <input
+                            ref={(el) => { inputRefs.current[index] = el; return undefined; }}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={1}
+                            value={digit}
+                            onChange={(e) => handleOtpChange(index, e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(index, e)}
+                            onPaste={handlePaste}
+                            style={{
+                              width: '44px',
+                              height: '52px',
+                              textAlign: 'center',
+                              fontSize: '18px',
+                              fontWeight: 700,
+                              fontFamily: "'Space Mono', monospace",
+                              color: '#1C1410',
+                              background: digit ? 'rgba(212,103,79,0.06)' : '#F5F0EC',
+                              border: digit ? '1.5px solid rgba(212,103,79,0.50)' : '1.5px solid #DDD5CE',
+                              borderRadius: '10px',
+                              outline: 'none',
+                              transition: 'border-color 0.15s, background 0.15s',
+                              caretColor: '#D4674F',
+                            }}
+                            onFocus={e => { e.target.style.borderColor = '#D4674F'; e.target.style.boxShadow = '0 0 0 3px rgba(212,103,79,0.12)'; }}
+                            onBlur={e => { e.target.style.borderColor = digit ? 'rgba(212,103,79,0.50)' : '#DDD5CE'; e.target.style.boxShadow = 'none'; }}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                    <FormMessage style={{ fontSize: '12px', color: '#C0504A', textAlign: 'center', marginTop: '8px', fontFamily: "'Space Mono', monospace" }} />
+                  </FormItem>
+                )}
+              />
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm shadow-md h-10"
-                  disabled={isSubmitting || otp.some(digit => !digit)}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    'Verify Account'
-                  )}
-                </Button>
-              </form>
-            </Form>
+              <button
+                type="submit"
+                disabled={isSubmitting || otp.some(digit => !digit)}
+                style={{
+                  width: '100%',
+                  height: '42px',
+                  marginTop: '24px',
+                  background: (isSubmitting || otp.some(d => !d)) ? '#E8DDD8' : '#D4674F',
+                  color: (isSubmitting || otp.some(d => !d)) ? '#A8A09A' : '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: '0.04em',
+                  cursor: (isSubmitting || otp.some(d => !d)) ? 'not-allowed' : 'pointer',
+                  transition: 'background 0.15s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                {isSubmitting ? (
+                  <><Loader2 style={{ width: '15px', height: '15px' }} className="animate-spin" /> Verifying...</>
+                ) : 'Verify Account'}
+              </button>
+            </form>
+          </Form>
 
-            {/* Additional Info */}
-            <div className="text-center">
-              <p className="text-gray-400 text-sm">
-                Didn't receive the code?{' '}
-                <button 
-                  onClick={() => router.push('/sign-up')}
-                  className="text-purple-300 hover:text-purple-200 transition-colors font-medium"
-                >
-                  Try signing up again
-                </button>
-              </p>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
+          <p style={{ fontSize: '12px', color: '#8A7A74', textAlign: 'center', marginTop: '20px', lineHeight: 1.6 }}>
+            Didn&apos;t receive the code?{' '}
+            <button
+              onClick={() => router.push('/sign-up')}
+              style={{ background: 'none', border: 'none', padding: 0, fontSize: '12px', color: '#D4674F', fontWeight: 700, cursor: 'pointer', fontFamily: "'Space Mono', monospace" }}
+            >
+              Try signing up again
+            </button>
+          </p>
+        </div>
+      </motion.div>
     </div>
   )
 }
