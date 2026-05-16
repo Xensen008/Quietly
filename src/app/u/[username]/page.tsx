@@ -4,16 +4,13 @@ import React, { useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock, CheckCircle2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-// import { CardHeader, CardContent, Card } from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,7 +20,7 @@ import { ApiResponse } from '@/types/ApiResponse';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const specialChar = '||';
 
@@ -34,16 +31,14 @@ const parseStringMessages = (messageString: string): string[] => {
 const initialMessageString =
   "What's your favorite movie?||Do you have any pets?||What's your dream job?";
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-};
-
 export default function SendMessage() {
   const params = useParams<{ username: string }>();
   const username = params.username;
   const [suggestedMessages, setSuggestedMessages] = useState<string>(initialMessageString);
   const [isSuggestLoading, setIsSuggestLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -55,8 +50,6 @@ export default function SendMessage() {
     form.setValue('content', message);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const onSubmit = async (data: z.infer<typeof messageSchema>) => {
     setIsLoading(true);
     try {
@@ -64,18 +57,15 @@ export default function SendMessage() {
         ...data,
         username,
       });
-
-      toast({
-        title: response.data.message,
-        variant: 'default',
-      });
+      toast({ title: response.data.message, variant: 'default' });
       form.reset({ ...form.getValues(), content: '' });
+      setSendSuccess(true);
+      setTimeout(() => setSendSuccess(false), 2800);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
         title: 'Error',
-        description:
-          axiosError.response?.data.message ?? 'Failed to sent message',
+        description: axiosError.response?.data.message ?? 'Failed to sent message',
         variant: 'destructive',
       });
     } finally {
@@ -86,9 +76,7 @@ export default function SendMessage() {
   const fetchSuggestedMessages = async () => {
     setIsSuggestLoading(true);
     try {
-      const response = await fetch('/api/suggest-messages', {
-        method: 'POST',
-      });
+      const response = await fetch('/api/suggest-messages', { method: 'POST' });
       const text = await response.text();
       setSuggestedMessages(text);
     } catch (error) {
@@ -104,148 +92,303 @@ export default function SendMessage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
-      
-      <div className="min-h-screen flex items-center justify-center py-8 sm:py-12 lg:py-16">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="w-full relative px-3 sm:px-6 lg:px-8 max-w-2xl mx-auto"
-        >
+    <div style={{ minHeight: '100vh', background: '#F5F0EC', fontFamily: "'Space Mono', monospace" }}>
+
+      <section style={{ padding: '36px 20px 56px' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+
           <motion.div
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-            className="space-y-6 sm:space-y-8"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ marginBottom: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
           >
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white">
-                Send Message to <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">@{username}</span>
-              </h1>
-              <p className="text-sm sm:text-base text-gray-300">
-                Your message will be completely anonymous
-              </p>
-            </div>
-
-            {/* Message Form */}
-            <div className="p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 shadow-lg">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center justify-between">
-                          <FormLabel className="text-sm sm:text-base text-gray-200">Your Message</FormLabel>
-                          <span className="text-xs text-gray-400">{field.value?.length || 0}/500</span>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Write your anonymous message here..."
-                            className="min-h-[200px] bg-black/20 border-white/20 text-gray-100 placeholder:text-gray-400 resize-none focus-visible:ring-purple-500 h-auto"
-                            maxLength={500}
-                            rows={8}
-                            onKeyDown={(e) => {
-                              const value = e.currentTarget.value;
-                              if (value.length >= 500 && e.key !== 'Backspace' && e.key !== 'Delete' && !e.metaKey && !e.ctrlKey) {
-                                e.preventDefault();
-                              }
-                            }}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-pink-200" />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      type="submit"
-                      disabled={isLoading || !messageContent}
-                      className="bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm shadow-md h-9 sm:h-10"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        'Send Message'
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-
-            {/* Suggested Messages */}
-            <motion.div
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              className="space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-medium text-white">Message Ideas</h2>
-                <Button
-                  onClick={fetchSuggestedMessages}
-                  disabled={isSuggestLoading}
-                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 h-9 sm:h-10 px-4 sm:px-5 text-sm"
-                >
-                  {isSuggestLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Get New Ideas'
-                  )}
-                </Button>
-              </div>
-
-              <div className="p-4 sm:p-5 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 shadow-lg space-y-3 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                {parseStringMessages(suggestedMessages).map((message, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleMessageClick(message)}
-                      className="w-full justify-start text-left text-gray-200 hover:text-white hover:bg-white/10 py-3 px-4 text-sm sm:text-base whitespace-normal break-words leading-relaxed"
-                    >
-                      {message}
-                    </Button>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Footer */}
-            <motion.div
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              className="text-center space-y-3"
-            >
-              <Separator className="bg-white/10" />
-              <div className="space-y-2">
-                <p className="text-sm text-gray-300">Want to receive anonymous messages?</p>
-                <Link href="/sign-up">
-                  <Button className="bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-sm shadow-md h-9 sm:h-10">
-                    Create Your Account
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: '21px', color: '#1C1410', letterSpacing: '-0.3px' }}>
+                Quietly
+              </span>
+            </Link>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', color: '#A89890', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <Lock style={{ width: '9px', height: '9px' }} />
+              anonymous
+            </span>
           </motion.div>
-        </motion.div>
-      </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.06 }}
+            style={{ marginBottom: '32px' }}
+          >
+            <p style={{ fontSize: '12px', color: '#A8412D', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 14px', fontWeight: 700 }}>
+              anonymous message
+            </p>
+            <h1 style={{ margin: '0 0 10px', lineHeight: 1.05 }}>
+              <span style={{ display: 'block', fontSize: '13px', color: '#8A7A74', marginBottom: '4px', fontWeight: 400 }}>
+                sending to
+              </span>
+              <span style={{
+                fontSize: 'clamp(30px, 7vw, 46px)',
+                color: '#1C1410',
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 700,
+                letterSpacing: '-1px',
+              }}>
+                @{username}
+              </span>
+            </h1>
+            <p style={{ fontSize: '13px', color: '#7A6A64', margin: '10px 0 0', lineHeight: 1.6, fontWeight: 400 }}>
+              They&apos;ll never know it was you — no account needed.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.13 }}
+            style={{
+              background: '#FFFFFF',
+              border: `1.5px solid ${isFocused ? '#D4674F' : '#DDD5CE'}`,
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: isFocused
+                ? '0 8px 32px rgba(212,103,79,0.12)'
+                : '0 2px 20px rgba(28,20,16,0.07)',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
+              marginBottom: '20px',
+            }}
+          >
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Write something honest, curious, or kind..."
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: '0',
+                            fontSize: '14px',
+                            color: '#1C1410',
+                            fontFamily: "'Space Mono', monospace",
+                            fontWeight: 500,
+                            padding: '20px 20px 0',
+                            minHeight: '130px',
+                            resize: 'none',
+                            lineHeight: '1.75',
+                            boxShadow: 'none',
+                          }}
+                          className="focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#C0B4AE] placeholder:font-normal"
+                          maxLength={500}
+                          rows={6}
+                          onFocus={() => setIsFocused(true)}
+                          onBlur={() => setIsFocused(false)}
+                          onKeyDown={(e) => {
+                            const value = e.currentTarget.value;
+                            if (value.length >= 500 && e.key !== 'Backspace' && e.key !== 'Delete' && !e.metaKey && !e.ctrlKey) {
+                              e.preventDefault();
+                            }
+                          }}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage style={{ fontSize: '11px', color: '#C0504A', fontFamily: "'Space Mono', monospace", padding: '0 20px 8px' }} />
+                    </FormItem>
+                  )}
+                />
+
+                <div style={{ padding: '12px 20px', borderTop: '1px solid #F0E8E4', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Lock style={{ width: '10px', height: '10px', color: '#B0A49E', flexShrink: 0 }} />
+                    <span style={{ fontSize: '11px', color: '#9A8880' }}>
+                      {username} can&apos;t see who sent this
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: '11px',
+                    color: (messageContent?.length ?? 0) >= 480 ? '#C0504A' : '#B0A49E',
+                    fontVariantNumeric: 'tabular-nums',
+                    flexShrink: 0,
+                  }}>
+                    {messageContent?.length ?? 0}/500
+                  </span>
+                </div>
+
+                <div style={{ padding: '0 16px 16px' }}>
+                  <AnimatePresence mode="wait">
+                    {sendSuccess ? (
+                      <motion.div
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          height: '46px',
+                          background: '#EDF7F1',
+                          border: '1px solid #B8DEC8',
+                          borderRadius: '10px',
+                        }}
+                      >
+                        <CheckCircle2 style={{ width: '14px', height: '14px', color: '#2E7D50' }} />
+                        <span style={{ fontSize: '13px', color: '#2E7D50', letterSpacing: '0.04em' }}>Sent. They&apos;ll never know.</span>
+                      </motion.div>
+                    ) : (
+                      <motion.div key="submit" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+                        <Button
+                          type="submit"
+                          disabled={isLoading || !messageContent}
+                          style={{
+                            width: '100%',
+                            height: '46px',
+                            background: isLoading || !messageContent ? '#EAD8D2' : '#D4674F',
+                            color: isLoading || !messageContent ? '#B89088' : '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '10px',
+                            fontSize: '13px',
+                            letterSpacing: '0.07em',
+                            fontFamily: "'Space Mono', monospace",
+                            fontWeight: 700,
+                            cursor: isLoading || !messageContent ? 'not-allowed' : 'pointer',
+                            transition: 'background 0.2s, color 0.2s',
+                          }}
+                        >
+                          {isLoading ? (
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                              <Loader2 style={{ width: '14px', height: '14px' }} className="animate-spin" />
+                              Sending...
+                            </span>
+                          ) : (
+                            'Send anonymously →'
+                          )}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </form>
+            </Form>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles style={{ width: '11px', height: '11px', color: '#A8412D' }} />
+                <span style={{ fontSize: '10px', letterSpacing: '0.13em', textTransform: 'uppercase', color: '#A8412D', fontWeight: 700 }}>
+                  Need a nudge?
+                </span>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={fetchSuggestedMessages}
+                disabled={isSuggestLoading}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #DDD5CE',
+                  borderRadius: '6px',
+                  padding: '4px 11px',
+                  fontSize: '11px',
+                  color: '#7A6A64',
+                  fontFamily: "'Space Mono', monospace",
+                  cursor: isSuggestLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  opacity: isSuggestLoading ? 0.5 : 1,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {isSuggestLoading ? (
+                  <>
+                    <Loader2 style={{ width: '10px', height: '10px' }} className="animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Shuffle ideas'
+                )}
+              </motion.button>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {parseStringMessages(suggestedMessages).map((message, index) => (
+                <motion.button
+                  key={index}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.26 + index * 0.05, duration: 0.25 }}
+                  whileHover={{ scale: 1.03, backgroundColor: '#D4674F', color: '#FFFFFF', borderColor: '#D4674F' }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleMessageClick(message)}
+                  style={{
+                    background: '#FFF8F5',
+                    border: '1px solid #EDD8D0',
+                    borderRadius: '999px',
+                    padding: '6px 14px',
+                    fontSize: '12px',
+                    color: '#6B3D34',
+                    fontFamily: "'Space Mono', monospace",
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    lineHeight: '1.5',
+                    outline: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                    userSelect: 'none',
+                    display: 'inline-block',
+                    fontWeight: 500,
+                  }}
+                >
+                  {message}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+        </div>
+      </section>
+
+      <section style={{ borderTop: '1px solid #E8DDD8', padding: '24px 20px' }}>
+        <div style={{
+          maxWidth: '560px',
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+        }}>
+          <p style={{ fontSize: '13px', color: '#7A6A64', margin: 0 }}>
+            Want your own Quietly page?
+          </p>
+          <Link
+            href="/sign-up"
+            style={{
+              fontSize: '12px',
+              color: '#FFFFFF',
+              background: '#D4674F',
+              textDecoration: 'none',
+              letterSpacing: '0.06em',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              fontWeight: 700,
+            }}
+          >
+            Get your free link →
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
