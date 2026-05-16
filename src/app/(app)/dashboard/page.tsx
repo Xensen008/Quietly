@@ -1,7 +1,6 @@
 'use client'
 import { MessageCard } from '@/components/MessageCard'
 import { Button } from '@/components/ui/button'
-// import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
 import { Message } from '@/models/User.model'
@@ -33,6 +32,9 @@ export default function Page() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSwitchLoading, setIsSwitchLoading] =useState<boolean>(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalMessages, setTotalMessages] = useState(0)
 
   const {toast} = useToast()
 
@@ -69,10 +71,13 @@ export default function Page() {
     setIsLoading(true)
     setIsSwitchLoading(true)
     try {
-      const response = await axios.get<ApiResponse>('/api/get-messages', {
+      const response = await axios.get<ApiResponse>(`/api/get-messages?page=${currentPage}&limit=9`, {
         withCredentials: true
       })
       setMessages(response?.data?.messages || [])
+      setCurrentPage(response.data.currentPage ?? 1)
+      setTotalPages(response.data.totalPages ?? 1)
+      setTotalMessages(response.data.totalMessages ?? 0)
       if(refresh){
         toast({
           title: 'refreshed',
@@ -91,13 +96,13 @@ export default function Page() {
       setIsSwitchLoading(false)
     }
     }
-  }, [setIsLoading, setMessages, toast])
+  }, [currentPage, setIsLoading, setMessages, toast])
 
   useEffect(() => {
     if(!session || !session.user) return
     fetchMessages()
     fetchAcceptMessage()
-  }, [session, setValue ,fetchAcceptMessage, fetchMessages])
+  }, [session, setValue ,fetchAcceptMessage, fetchMessages, currentPage])
 
 
   const handleSwitchChange = async () => {
@@ -125,25 +130,49 @@ export default function Page() {
 
   if(!session || !session.user){
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
-        <motion.div 
+      <div style={{ minHeight: '100vh', background: '#F5F0EC', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Space Mono', monospace" }}>
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center p-8 rounded-xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl"
+          transition={{ duration: 0.4 }}
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #DDD5CE',
+            borderRadius: '16px',
+            boxShadow: '0 2px 20px rgba(28,20,16,0.07)',
+            padding: '48px 40px',
+            textAlign: 'center',
+            maxWidth: '380px',
+            width: '100%',
+            margin: '0 20px',
+          }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Authentication Required
+          <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#A8412D', fontWeight: 700, margin: '0 0 16px' }}>
+            Access Required
+          </p>
+          <h2 style={{ fontSize: '18px', color: '#1C1410', fontWeight: 700, margin: '0 0 10px' }}>
+            Sign in to continue
           </h2>
-          <p className="text-gray-300 mb-6">
+          <p style={{ fontSize: '13px', color: '#8A7A74', margin: '0 0 28px', lineHeight: 1.6 }}>
             Please sign in to access your dashboard
           </p>
-          <Link href="/sign-in">
-            <Button 
-              className="relative overflow-hidden group bg-white/10 hover:bg-white/15 text-white border-0 transition-all duration-300 text-base px-8 py-6 h-auto"
+          <Link href="/sign-in" style={{ textDecoration: 'none' }}>
+            <Button
+              style={{
+                width: '100%',
+                height: '44px',
+                background: '#D4674F',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+              }}
             >
-              <span className="relative z-10 font-medium">Sign In</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm"></div>
-              <div className="absolute inset-0 border border-white/10 rounded-lg group-hover:border-white/20 transition-colors duration-300"></div>
+              Sign In →
             </Button>
           </Link>
         </motion.div>
@@ -158,10 +187,8 @@ export default function Page() {
   const copyToClipboard = async () => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        // For HTTPS or localhost
         await navigator.clipboard.writeText(profileUrl);
       } else {
-        // Fallback for HTTP
         const textArea = document.createElement("textarea");
         textArea.value = profileUrl;
         textArea.style.position = "fixed";
@@ -192,203 +219,318 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900">
+    <div style={{ minHeight: '100vh', background: '#F5F0EC', fontFamily: "'Space Mono', monospace" }}>
       <style jsx global>{`
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: rgba(139, 92, 246, 0.2);
-          border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: rgba(139, 92, 246, 0.3);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #E8DDD8; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #D4674F; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C05A42; }
+        .msg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        @media (max-width: 900px) { .msg-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .msg-grid { grid-template-columns: 1fr; } }
       `}</style>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-purple-400/10 to-transparent pointer-events-none"></div>
-      
-      <div className="min-h-screen flex items-center justify-center py-16 sm:py-20">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="w-full relative px-3 sm:px-6 lg:px-8 max-w-[90rem] mx-auto"
+
+      <nav style={{
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E8DDD8',
+        padding: '0 20px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+      }}>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: '21px', color: '#1C1410', letterSpacing: '-0.3px' }}>
+            Quietly
+          </span>
+        </Link>
+        <span style={{ fontSize: '11px', color: '#8A7A74', letterSpacing: '0.06em' }}>
+          @{username}
+        </span>
+      </nav>
+
+      <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '40px 20px' }}>
+
+        <motion.div
+          variants={fadeInUp}
+          initial="initial"
+          animate="animate"
+          style={{ marginBottom: '32px' }}
         >
-          {/* Header Section */}
-          <motion.div 
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-            className="mb-6 sm:mb-8 lg:mb-10"
-          >
-            <div className="max-w-2xl mx-auto lg:mx-0">
-              <h1 className="text-lg sm:text-2xl lg:text-3xl font-semibold text-white mt-10 mb-2">
-                Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200">{username}</span>
-              </h1>
-              <p className="text-sm sm:text-base text-gray-200">
-                Manage your messages and settings here
-              </p>
-            </div>
-          </motion.div>
+          <p style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#A8412D', fontWeight: 700, margin: '0 0 10px' }}>
+            Your Dashboard
+          </p>
+          <h1 style={{ fontSize: '18px', color: '#1C1410', fontWeight: 700, margin: 0, lineHeight: 1.3 }}>
+            Welcome back, <span style={{ color: '#D4674F' }}>@{username}</span>
+          </h1>
+        </motion.div>
 
-          <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:gap-6">
-            {/* First Row - Profile Link and Settings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 xl:gap-6">
-              {/* Profile Link Card */}
-              <motion.div 
-                variants={fadeInUp}
-                initial="initial"
-                animate="animate"
-              >
-                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
-                      <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
-                    </div>
-                    <h2 className="text-sm sm:text-base font-medium text-white">Share Your Link</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+
+            <motion.div variants={fadeInUp} initial="initial" animate="animate">
+              <div style={{
+                background: '#FFFFFF',
+                border: '1px solid #DDD5CE',
+                borderRadius: '16px',
+                boxShadow: '0 2px 20px rgba(28,20,16,0.07)',
+                padding: '24px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <div style={{ padding: '8px', borderRadius: '8px', background: '#FFF0EC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Link2 style={{ width: '15px', height: '15px', color: '#D4674F' }} />
                   </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="p-2 sm:p-3 bg-black/20 rounded-md font-mono text-[11px] sm:text-sm text-purple-100 break-all border border-white/20">
-                      {profileUrl}
-                    </div>
-                    <Button
-                      onClick={copyToClipboard}
-                      className="w-full h-8 sm:h-10 bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-purple-500/30 hover:from-purple-500/40 hover:via-pink-500/40 hover:to-purple-500/40 text-white border border-white/20 hover:border-white/30 transition-all duration-300 text-xs sm:text-sm shadow-md"
-                    >
-                      <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                      Copy Link
-                    </Button>
-                  </div>
+                  <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#1C1410', margin: 0 }}>
+                    Share Your Link
+                  </h2>
                 </div>
-              </motion.div>
-
-              {/* Settings Card */}
-              <motion.div 
-                variants={fadeInUp}
-                initial="initial"
-                animate="animate"
-              >
-                <div className="h-full p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
-                      <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
-                    </div>
-                    <h2 className="text-sm sm:text-base font-medium text-white">Message Settings</h2>
-                  </div>
-                  <div className="space-y-3 sm:space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                        <label className="text-xs sm:text-sm text-gray-100">Accept Messages</label>
-                        <Switch
-                          {...register('acceptMessages')}
-                          checked={acceptMessage}
-                          onCheckedChange={handleSwitchChange}
-                          disabled={isSwitchLoading}
-                          className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-white/20 scale-90 sm:scale-100"
-                        />
-                      </div>
-                      <p className="text-[11px] sm:text-sm text-gray-300">
-                        {acceptMessage 
-                          ? 'Your feedback link is active' 
-                          : 'Your feedback link is disabled'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Second Row - Messages */}
-            <motion.div 
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              className="h-full"
-            >
-              <div className="h-[calc(100vh-12rem)] p-3 sm:p-4 xl:p-6 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20 hover:bg-white/15 transition-all duration-300 shadow-lg">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-1.5 sm:p-2 rounded-md bg-purple-500/20">
-                      <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm sm:text-base font-medium text-white">Messages</h2>
-                      {messages.length > 0 && (
-                        <p className="text-[11px] sm:text-sm text-gray-300 mt-0.5">
-                          {messages.length} message{messages.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{
+                    padding: '10px 14px',
+                    background: '#FAF5F2',
+                    border: '1px solid #E8DDD8',
+                    borderRadius: '8px',
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: '12px',
+                    color: '#5A4A44',
+                    wordBreak: 'break-all',
+                    lineHeight: 1.5,
+                  }}>
+                    {profileUrl}
                   </div>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      fetchMessages(true);
+                    onClick={copyToClipboard}
+                    style={{
+                      width: '100%',
+                      height: '42px',
+                      background: '#D4674F',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontSize: '12px',
+                      fontFamily: "'Space Mono', monospace",
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '7px',
                     }}
-                    className="p-1.5 sm:p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200"
                   >
-                    {isLoading ? (
-                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-                    ) : (
-                      <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    )}
+                    <Copy style={{ width: '13px', height: '13px' }} />
+                    Copy Link
                   </Button>
                 </div>
+              </div>
+            </motion.div>
 
-                <div className="h-[calc(100%-4rem)] overflow-y-auto pr-2 space-y-0 sm:space-y-0 scrollbar-thin scrollbar-thumb-purple-300/20 hover:scrollbar-thumb-purple-300/30 scrollbar-track-white/5 hover:scrollbar-track-white/10 transition-colors">
-                  {messages.length > 0 ? (
-                    <motion.div 
-                      variants={fadeIn}
-                      initial="initial"
-                      animate="animate"
-                      className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
-                    >
-                      {messages.map((message) => (
-                        <motion.div
-                          key={message._id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="w-full min-w-0"
-                        >
-                          <MessageCard
-                            message={message}
-                            onMessageDelete={handleDeleteMessage}
-                          />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      variants={fadeIn}
-                      initial="initial"
-                      animate="animate"
-                      className="flex flex-col items-center justify-center h-full py-6 sm:py-8 xl:py-12 px-4"
-                    >
-                      <div className="p-2 sm:p-3 rounded-md bg-purple-500/20 mb-3 sm:mb-4">
-                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 xl:w-6 xl:h-6 text-purple-200" />
-                      </div>
-                      <h3 className="text-sm sm:text-base font-medium text-white mb-1">No messages yet</h3>
-                      <p className="text-[11px] sm:text-sm text-gray-300 text-center max-w-sm">
-                        Share your link to receive anonymous feedback
-                      </p>
-                    </motion.div>
-                  )}
+            <motion.div variants={fadeInUp} initial="initial" animate="animate">
+              <div style={{
+                background: '#FFFFFF',
+                border: '1px solid #DDD5CE',
+                borderRadius: '16px',
+                boxShadow: '0 2px 20px rgba(28,20,16,0.07)',
+                padding: '24px',
+                height: '100%',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                  <div style={{ padding: '8px', borderRadius: '8px', background: '#FFF0EC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MessageSquare style={{ width: '15px', height: '15px', color: '#D4674F' }} />
+                  </div>
+                  <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#1C1410', margin: 0 }}>
+                    Message Settings
+                  </h2>
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <label style={{ fontSize: '13px', color: '#1C1410', fontWeight: 500 }}>
+                      Accept Messages
+                    </label>
+                    <Switch
+                      {...register('acceptMessages')}
+                      checked={acceptMessage}
+                      onCheckedChange={handleSwitchChange}
+                      disabled={isSwitchLoading}
+                      className="data-[state=checked]:bg-[#D4674F] data-[state=unchecked]:bg-[#DDD5CE]"
+                    />
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#8A7A74', margin: 0 }}>
+                    {acceptMessage
+                      ? 'Your feedback link is active'
+                      : 'Your feedback link is disabled'}
+                  </p>
                 </div>
               </div>
             </motion.div>
           </div>
-        </motion.div>
+
+          <motion.div variants={fadeInUp} initial="initial" animate="animate">
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #DDD5CE',
+              borderRadius: '16px',
+              boxShadow: '0 2px 20px rgba(28,20,16,0.07)',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '780px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ padding: '8px', borderRadius: '8px', background: '#FFF0EC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MessageSquare style={{ width: '15px', height: '15px', color: '#D4674F' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#1C1410', margin: 0 }}>
+                      Messages
+                    </h2>
+                    {totalMessages > 0 && (
+                      <p style={{ fontSize: '11px', color: '#8A7A74', margin: '2px 0 0' }}>
+                        {totalMessages} message{totalMessages !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                  {totalMessages > 0 && (
+                    <span style={{
+                      background: '#FFF0EC',
+                      border: '1px solid #EDD8D0',
+                      borderRadius: '999px',
+                      padding: '2px 10px',
+                      fontSize: '11px',
+                      color: '#D4674F',
+                      fontWeight: 700,
+                    }}>
+                      {totalMessages}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchMessages(true);
+                  }}
+                  style={{
+                    width: '34px',
+                    height: '34px',
+                    background: '#FFF0EC',
+                    border: '1px solid #EDD8D0',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#D4674F',
+                    flexShrink: 0,
+                  }}
+                >
+                  {isLoading ? (
+                    <Loader2 style={{ width: '14px', height: '14px' }} className="animate-spin" />
+                  ) : (
+                    <RefreshCcw style={{ width: '14px', height: '14px' }} />
+                  )}
+                </Button>
+              </div>
+
+              <div style={{ overflowY: 'auto', flex: 1 }}>
+                {messages.length > 0 ? (
+                  <motion.div
+                    variants={fadeIn}
+                    initial="initial"
+                    animate="animate"
+                    className="msg-grid"
+                    style={{}}
+                  >
+                    {messages.map((message) => (
+                      <motion.div
+                        key={message._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ width: '100%', minWidth: 0 }}
+                      >
+                        <MessageCard
+                          message={message}
+                          onMessageDelete={handleDeleteMessage}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    variants={fadeIn}
+                    initial="initial"
+                    animate="animate"
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 20px', textAlign: 'center' }}
+                  >
+                    <div style={{ padding: '14px', borderRadius: '12px', background: '#FFF0EC', marginBottom: '14px', display: 'inline-flex' }}>
+                      <MessageSquare style={{ width: '22px', height: '22px', color: '#D4674F' }} />
+                    </div>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1C1410', margin: '0 0 6px' }}>
+                      No messages yet
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#8A7A74', margin: 0, lineHeight: 1.6, maxWidth: '300px' }}>
+                      Share your link to receive anonymous feedback
+                    </p>
+                  </motion.div>
+                )}
+              </div>
+
+              {totalPages > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', paddingTop: '20px', borderTop: '1px solid #F0E8E4', marginTop: '16px' }}>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    style={{
+                      height: '34px',
+                      padding: '0 14px',
+                      background: currentPage === 1 ? '#F5F0EC' : '#D4674F',
+                      color: currentPage === 1 ? '#8A7A74' : '#FFFFFF',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontSize: '12px',
+                      fontFamily: "'Space Mono', monospace",
+                      fontWeight: 700,
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    ← Prev
+                  </button>
+                  <span style={{ fontSize: '12px', color: '#5A4A44', fontFamily: "'Space Mono', monospace" }}>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    style={{
+                      height: '34px',
+                      padding: '0 14px',
+                      background: currentPage === totalPages ? '#F5F0EC' : '#D4674F',
+                      color: currentPage === totalPages ? '#8A7A74' : '#FFFFFF',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontSize: '12px',
+                      fontFamily: "'Space Mono', monospace",
+                      fontWeight: 700,
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+        </div>
       </div>
     </div>
   );
 }
-
-
-// export default page

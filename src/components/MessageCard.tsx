@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { Trash2, Download, Copy, MessageCircle, Share2 } from 'lucide-react';
@@ -28,11 +28,22 @@ type MessageCardProps = {
   onMessageDelete: (messageId: string) => void;
 };
 
-
-//TODO:change
 export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
   const { toast } = useToast();
   const messageCardRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const [copyHovered, setCopyHovered] = useState(false);
+  const [downloadHovered, setDownloadHovered] = useState(false);
+  const [deleteHovered, setDeleteHovered] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (textRef.current) {
+      setIsOverflowing(textRef.current.scrollHeight > textRef.current.clientHeight + 1);
+    }
+  }, [message.content]);
 
   const handleDeleteConfirm = async () => {
     try {
@@ -116,97 +127,284 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
-      className="group"
     >
-      <Card 
+      <style>{`
+        [data-message-card] .blob { display: none; }
+        [data-message-card].screenshot-mode .blob { display: block; }
+      `}</style>
+      <div
         ref={messageCardRef}
         data-message-card
-        className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950/90 backdrop-blur-xl border border-purple-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-purple-500/10 transition-all duration-300 ring-1 ring-purple-300/10"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          background: 'linear-gradient(145deg, #FDF6F2 0%, #F8EDE7 50%, #F5E4DC 100%)',
+          border: hovered ? '1.5px solid rgba(212,103,79,0.55)' : '1.5px solid rgba(212,103,79,0.25)',
+          borderRadius: '14px',
+          boxShadow: hovered
+            ? '0 8px 28px rgba(212,103,79,0.20)'
+            : '0 3px 14px rgba(212,103,79,0.10)',
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          padding: '24px',
+          fontFamily: "'Space Mono', monospace",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: '180px',
+        }}
       >
-        {/* Fun decorative elements */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(168,85,247,0.15),rgba(0,0,0,0))]" />
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl" />
-        
-        <div className="relative p-5 sm:p-6 space-y-5">
-          {/* Brand and Message Content */}
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-2 bg-white/5 rounded-full pl-2.5 pr-3.5 py-1.5 border border-purple-500/20 shadow-sm">
-                <MessageCircle className="w-4 h-4 text-purple-300" />
-                <span className="text-sm font-medium text-white">
-                  Quietly
-                </span>
-              </div>
-              <div className="text-xs text-purple-100/90 bg-white/5 rounded-full px-3.5 py-1.5 border border-purple-500/20 shadow-sm">
-                ✨ Send messages at quietly.vercel.app
-              </div>
-            </div>
-            <div className="flex justify-between items-start gap-4 bg-black/20 rounded-xl p-4 border border-purple-500/10">
-              <div className="flex-grow min-w-0">
-                <p className="text-base sm:text-lg text-white font-normal leading-relaxed break-all whitespace-pre-wrap">
-                  {message.content}
-                </p>
-              </div>
-            </div>
-          </div>
+        <div
+          className="blob"
+          style={{
+            top: '-30px',
+            right: '-20px',
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            background: '#D4674F',
+            filter: 'blur(50px)',
+            opacity: 0.22,
+            position: 'absolute',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          className="blob"
+          style={{
+            bottom: '-20px',
+            left: '-10px',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: '#F0A882',
+            filter: 'blur(35px)',
+            opacity: 0.15,
+            position: 'absolute',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '16px',
+            fontSize: '56px',
+            lineHeight: 1,
+            color: 'rgba(212,103,79,0.40)',
+            fontFamily: "'DM Serif Display', serif",
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
+          {'\u201C'}
+        </div>
+        <span
+          style={{
+            fontSize: '10px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: '#A8412D',
+            fontFamily: "'Space Mono', monospace",
+            fontWeight: 700,
+          }}
+        >
+          <span style={{ color: '#D4674F', marginRight: '4px' }}>·</span>Quietly
+        </span>
 
-          {/* Actions and Timestamp */}
-          <div className="flex items-center justify-between border-t border-purple-500/20 pt-4">
-            <time className="text-sm text-purple-100/70 bg-white/5 rounded-full px-3 py-1 border border-purple-500/20">
-              {dayjs(message.createdAt).format('MMM D, YYYY [at] h:mm A')}
-            </time>
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={copyToClipboard}
-                className="h-9 w-9 bg-white/5 text-purple-100 hover:bg-purple-500/20 hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 border border-purple-500/20"
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <p
+            ref={textRef}
+            style={{
+              fontSize: '14px',
+              fontWeight: 500,
+              lineHeight: 1.75,
+              color: '#1C1410',
+              fontFamily: "'Space Mono', monospace",
+              margin: 0,
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
+              overflow: expanded ? 'visible' : 'hidden',
+              display: expanded ? 'block' : '-webkit-box',
+              WebkitLineClamp: expanded ? undefined : 4,
+              WebkitBoxOrient: expanded ? undefined : 'vertical',
+            } as React.CSSProperties}
+          >
+            {message.content}
+          </p>
+
+          {isOverflowing && (
+            <button
+              onClick={() => setExpanded(e => !e)}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontSize: '11px',
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 700,
+                color: '#D4674F',
+                cursor: 'pointer',
+                letterSpacing: '0.04em',
+                alignSelf: 'flex-start',
+              }}
+            >
+              {expanded ? 'see less ↑' : 'see more ↓'}
+            </button>
+          )}
+        </div>
+
+        <div
+          style={{
+            borderTop: '1px solid rgba(212,103,79,0.15)',
+            paddingTop: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <time
+            style={{
+              fontSize: '11px',
+              color: '#C47A62',
+              fontFamily: "'Space Mono', monospace",
+            }}
+          >
+            {dayjs(message.createdAt).format('MMM D, YYYY [at] h:mm A')}
+          </time>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={copyToClipboard}
+              onMouseEnter={() => setCopyHovered(true)}
+              onMouseLeave={() => setCopyHovered(false)}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: copyHovered ? '#D4674F' : 'rgba(212,103,79,0.10)',
+                color: copyHovered ? '#FFFFFF' : '#8A7A74',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease, color 0.15s ease',
+                flexShrink: 0,
+              }}
+            >
+              <Copy style={{ width: '14px', height: '14px' }} />
+            </button>
+
+            <button
+              onClick={downloadCard}
+              onMouseEnter={() => setDownloadHovered(true)}
+              onMouseLeave={() => setDownloadHovered(false)}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: downloadHovered ? '#D4674F' : 'rgba(212,103,79,0.10)',
+                color: downloadHovered ? '#FFFFFF' : '#8A7A74',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease, color 0.15s ease',
+                flexShrink: 0,
+              }}
+            >
+              <Download style={{ width: '14px', height: '14px' }} />
+            </button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  onMouseEnter={() => setDeleteHovered(true)}
+                  onMouseLeave={() => setDeleteHovered(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: deleteHovered ? '#FFF0EE' : 'rgba(212,103,79,0.10)',
+                    color: deleteHovered ? '#C0504A' : '#8A7A74',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s ease, color 0.15s ease',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Trash2 style={{ width: '14px', height: '14px' }} />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E8DDD8',
+                  borderRadius: '14px',
+                  fontFamily: "'Space Mono', monospace",
+                  maxWidth: '420px',
+                  width: '90%',
+                }}
               >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={downloadCard}
-                className="h-9 w-9 bg-white/5 text-purple-100 hover:bg-purple-500/20 hover:text-white hover:scale-105 active:scale-95 transition-all duration-150 border border-purple-500/20"
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-9 w-9 bg-white/5 text-purple-100 hover:bg-red-500/20 hover:text-red-100 hover:scale-105 active:scale-95 transition-all duration-150 border border-purple-500/20"
+                <AlertDialogHeader>
+                  <AlertDialogTitle
+                    style={{
+                      fontSize: '16px',
+                      color: '#1C1410',
+                      fontFamily: "'Space Mono', monospace",
+                      fontWeight: 700,
+                    }}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-gradient-to-br from-slate-950 to-purple-950/90 border border-purple-500/30 backdrop-blur-xl max-w-[90%] w-full sm:max-w-lg mx-auto">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg text-white">Delete Message?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-purple-100/80 text-base">
-                      This action cannot be undone. This message will be permanently deleted.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="sm:space-x-2">
-                    <AlertDialogCancel className="bg-white/5 text-purple-100 border-purple-500/20 hover:bg-purple-500/20 hover:text-white text-base font-normal">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDeleteConfirm}
-                      className="bg-red-500/10 text-red-100 hover:bg-red-500/20 border border-red-500/20 text-base font-normal"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                    Delete Message?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription
+                    style={{
+                      fontSize: '13px',
+                      color: '#8A7A74',
+                      fontFamily: "'Space Mono', monospace",
+                    }}
+                  >
+                    This action cannot be undone. This message will be permanently deleted.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    style={{
+                      backgroundColor: '#F5F0EC',
+                      color: '#1C1410',
+                      border: '1px solid #DDD5CE',
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteConfirm}
+                    style={{
+                      backgroundColor: '#FFF0EE',
+                      color: '#C0504A',
+                      border: '1px solid #F0C8C4',
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }
