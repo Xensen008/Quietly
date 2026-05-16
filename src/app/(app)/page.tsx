@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -20,140 +19,179 @@ import {
   CarouselNext,
 } from '@/components/ui/carousel';
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+const fadeUp = {
+  initial: { opacity: 0, y: 14 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 }
+  transition: { duration: 0.45 },
 };
 
 const stagger = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+  animate: { transition: { staggerChildren: 0.07 } },
 };
+
+const features = [
+  {
+    icon: <Shield style={{ width: 16, height: 16, color: '#D4674F' }} />,
+    title: 'No sign-up required',
+    desc: 'Anyone can leave feedback without an account.',
+  },
+  {
+    icon: <MessageSquare style={{ width: 16, height: 16, color: '#D4674F' }} />,
+    title: 'One simple link',
+    desc: 'Share your unique page anywhere you like.',
+  },
+  {
+    icon: <Heart style={{ width: 16, height: 16, color: '#D4674F' }} />,
+    title: 'Honest insights',
+    desc: 'Get genuine, unfiltered thoughts.',
+  },
+];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900">
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 md:px-6 lg:px-8 overflow-hidden">
-        <motion.div 
-          className="max-w-7xl mx-auto w-full pt-24 md:pt-32 pb-12 md:pb-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-        >
-          <motion.div 
-            className="text-center"
-            variants={fadeInUp}
+    <div style={{ background: '#FAFAF8', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
+
+      <section
+        className="min-h-screen flex flex-col justify-center px-6 pt-20 pb-12"
+        style={{
+          background: 'linear-gradient(160deg, #FAFAF8 55%, #FBF0ED 100%)',
+        }}
+      >
+        <div className="max-w-3xl mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+            className="mb-10"
+          >
+            <span
+              className="inline-block mb-4 px-3 py-1 rounded-full tracking-widest uppercase"
+              style={{
+                fontSize: '10px',
+                color: '#D4674F',
+                background: '#FAE8E4',
+                letterSpacing: '0.14em',
+              }}
+            >
+              Anonymous feedback
+            </span>
+
+            <h1
+              className="font-bold leading-tight mb-4"
+              style={{
+                fontSize: 'clamp(36px, 5vw, 50px)',
+                fontFamily: "'DM Serif Display', serif",
+                color: '#1A1A1A',
+                letterSpacing: '-0.5px',
+                maxWidth: '580px',
+              }}
+            >
+              A quiet place for{' '}
+              <span style={{ color: '#D4674F' }}>honest words.</span>
+            </h1>
+
+            <p style={{ fontSize: '15px', color: '#6B7280', maxWidth: '400px', lineHeight: 1.7 }}>
+              Create your space. Share your link. Get real, anonymous feedback — no accounts needed.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+            variants={stagger}
             initial="initial"
             animate="animate"
           >
-            <motion.h1 
-              className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 md:mb-8 tracking-tight leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-purple-300 to-pink-200">
-                Receive Feedback Quietly
-              </span>
-            </motion.h1>
-            <motion.p 
-              className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              Create your space. Share your link. Get honest feedback.
-            </motion.p>
+            {features.map((f, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                className="rounded-xl p-5"
+                style={{
+                  background: i === 1 ? '#D4674F' : '#FFFFFF',
+                  border: '1.5px solid',
+                  borderColor: i === 1 ? '#D4674F' : '#D4674F40',
+                  boxShadow: i === 1 ? '0 4px 16px rgba(212,103,79,0.25)' : '0 2px 12px rgba(212,103,79,0.08)',
+                }}
+              >
+                <div
+                  className="mb-3 flex items-center justify-center rounded-md"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    background: i === 1 ? 'rgba(255,255,255,0.18)' : '#FAEDEA',
+                  }}
+                >
+                  {i === 1
+                    ? <f.icon.type style={{ width: 16, height: 16, color: '#FFFFFF' }} />
+                    : f.icon}
+                </div>
+                <p
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: i === 1 ? '#FFFFFF' : '#1A1A1A',
+                    marginBottom: 4,
+                  }}
+                >
+                  {f.title}
+                </p>
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: i === 1 ? 'rgba(255,255,255,0.75)' : '#9CA3AF',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {f.desc}
+                </p>
+              </motion.div>
+            ))}
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Features Section */}
-      <motion.section 
-        className="py-12 md:py-20 px-4 md:px-6 lg:px-8"
-        variants={stagger}
-        initial="initial"
-        animate="animate"
+      <section
+        className="py-16 px-6"
+        style={{ background: '#FBF0ED' }}
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-            <motion.div variants={fadeInUp} className="h-full">
-              <Card className="bg-white/5 backdrop-blur-lg border-0 shadow-xl hover:bg-white/10 transition-all duration-300 h-full">
-                <CardHeader className="space-y-1 md:space-y-2">
-                  <Shield className="h-6 w-6 md:h-8 md:w-8 text-indigo-300 mb-1 md:mb-2" />
-                  <CardTitle className="text-lg md:text-xl text-white/90">No Sign-up Required</CardTitle>
-                  <CardDescription className="text-sm md:text-base text-gray-400">
-                    Anyone can leave feedback anonymously
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-            <motion.div variants={fadeInUp} className="h-full">
-              <Card className="bg-white/5 backdrop-blur-lg border-0 shadow-xl hover:bg-white/10 transition-all duration-300 h-full">
-                <CardHeader className="space-y-1 md:space-y-2">
-                  <MessageSquare className="h-6 w-6 md:h-8 md:w-8 text-purple-300 mb-1 md:mb-2" />
-                  <CardTitle className="text-lg md:text-xl text-white/90">One Simple Link</CardTitle>
-                  <CardDescription className="text-sm md:text-base text-gray-400">
-                    Share your unique feedback page
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-            <motion.div variants={fadeInUp} className="h-full sm:col-span-2 lg:col-span-1">
-              <Card className="bg-white/5 backdrop-blur-lg border-0 shadow-xl hover:bg-white/10 transition-all duration-300 h-full">
-                <CardHeader className="space-y-1 md:space-y-2">
-                  <Heart className="h-6 w-6 md:h-8 md:w-8 text-pink-300 mb-1 md:mb-2" />
-                  <CardTitle className="text-lg md:text-xl text-white/90">Honest Insights</CardTitle>
-                  <CardDescription className="text-sm md:text-base text-gray-400">
-                    Get genuine, unfiltered feedback
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Messages Carousel Section */}
-      <motion.section 
-        className="py-12 md:py-20 px-4 md:px-6 lg:px-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-      >
-        <div className="max-w-4xl mx-auto">
-          <motion.h2 
-            className="text-xl md:text-3xl font-bold text-center text-white/90 mb-8 md:mb-12"
-            variants={fadeInUp}
+        <div className="max-w-3xl mx-auto">
+          <p
+            className="text-center mb-8 tracking-widest uppercase"
+            style={{ fontSize: '10px', color: '#D4674F', letterSpacing: '0.15em' }}
           >
-            Recent Feedback
-          </motion.h2>
+            Recent messages
+          </p>
+
           <Carousel
             plugins={[Autoplay({ delay: 3000 })]}
             className="w-full"
-            opts={{
-              loop: true,
-              align: "start",
-            }}
+            opts={{ loop: true, align: 'start' }}
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
+            <CarouselContent className="-ml-3">
               {messages.map((message, index) => (
-                <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/2">
-                  <Card className="mx-1 md:mx-2 bg-white/5 backdrop-blur-lg border-0 shadow-xl hover:bg-white/10 transition-all duration-300">
-                    <CardHeader>
-                      <CardTitle className="text-base md:text-lg text-white/90">{message.title}</CardTitle>
+                <CarouselItem key={index} className="pl-3 basis-full sm:basis-1/2">
+                  <Card
+                    className="rounded-xl border"
+                    style={{
+                      background: '#FFFFFF',
+                      borderColor: '#D4674F55',
+                      borderWidth: '1.5px',
+                      boxShadow: '0 3px 14px rgba(212,103,79,0.1)',
+                    }}
+                  >
+                    <CardHeader className="pb-2 pt-5 px-5">
+                      <CardTitle style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A1A' }}>
+                        {message.title}
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex items-start space-x-4">
-                        <Mail className="h-4 w-4 md:h-5 md:w-5 text-purple-300 mt-1 flex-shrink-0" />
+                    <CardContent className="px-5 pb-5">
+                      <div className="flex items-start gap-3">
+                        <Mail style={{ width: 13, height: 13, color: '#D4674F', marginTop: 2, flexShrink: 0 }} />
                         <div>
-                          <p className="text-sm md:text-base text-gray-300">{message.content}</p>
-                          <p className="text-xs text-gray-500 mt-2">
+                          <p style={{ fontSize: '13px', color: '#4B5563', lineHeight: 1.65 }}>
+                            {message.content}
+                          </p>
+                          <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: 5 }}>
                             {message.received}
                           </p>
                         </div>
@@ -164,24 +202,25 @@ export default function Home() {
               ))}
             </CarouselContent>
             <div className="hidden sm:block">
-              <CarouselPrevious className="text-white/70 hover:text-white bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300" />
-              <CarouselNext className="text-white/70 hover:text-white bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300" />
+              <CarouselPrevious
+                style={{ background: '#FFFFFF', border: '1px solid #E2DFD9', color: '#6B7280' }}
+              />
+              <CarouselNext
+                style={{ background: '#FFFFFF', border: '1px solid #E2DFD9', color: '#6B7280' }}
+              />
             </div>
           </Carousel>
         </div>
-      </motion.section>
+      </section>
 
-      {/* Footer */}
-      <footer className="text-center p-4 md:p-6 text-gray-400 border-t border-white/5">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-sm md:text-base"
-        >
+      <footer
+        className="text-center py-5 px-6"
+        style={{ borderTop: '1px solid #E8E6E1', background: '#FAFAF8' }}
+      >
+        <p style={{ fontSize: '12px', color: '#9CA3AF' }}>
           © {new Date().getFullYear()} Quietly. All rights reserved.
-        </motion.p>
+        </p>
       </footer>
     </div>
   );
-} 
+}
